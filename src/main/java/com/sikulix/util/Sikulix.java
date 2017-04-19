@@ -50,7 +50,7 @@ public class Sikulix {
     if (options.contains("test")) {
 
       traceBlock("testing: native libraries");
-      SX.setBaseClass();
+      SX.setSXBASECLASS();
 
       traceBlock("testing: NativeHook");
       if (!SX.isHeadless()) {

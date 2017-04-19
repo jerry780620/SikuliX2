@@ -479,7 +479,7 @@ public class Element implements Comparable<Element> {
   }
 
   public void setCentered() {
-    Element centered = getCentered(new Element(SX.getLOCALDEVICE().getMonitor()));
+    Element centered = getCentered(new Element(SX.getSXLOCALDEVICE().getMonitor()));
     x = centered.x;
     y = centered.y;
   }
@@ -492,9 +492,9 @@ public class Element implements Comparable<Element> {
 
   public Element getCentered(int... args) {
     if (args.length == 0) {
-      return getCentered(new Element(SX.getLOCALDEVICE().getMonitor()), null);
+      return getCentered(new Element(SX.getSXLOCALDEVICE().getMonitor()), null);
     } else {
-      return getCentered(new Element(SX.getLOCALDEVICE().getMonitor()), new Element(-args[0]));
+      return getCentered(new Element(SX.getSXLOCALDEVICE().getMonitor()), new Element(-args[0]));
     }
   }
 
@@ -1019,13 +1019,13 @@ public class Element implements Comparable<Element> {
   //<editor-fold desc="***** device related">
   public IDevice getDevice() {
     if (SX.isNull(elementDevice)) {
-      elementDevice = SX.getLOCALDEVICE();
+      elementDevice = SX.getSXLOCALDEVICE();
     }
     return elementDevice;
   }
 
   public LocalDevice getLocalDevice() {
-    return SX.getLOCALDEVICE();
+    return SX.getSXLOCALDEVICE();
   }
 
   public void setDevice(IDevice elementDevice) {
@@ -1270,7 +1270,7 @@ public class Element implements Comparable<Element> {
     if (SX.isNotNull(url) && hasContent()) {
       if ("file".equals(url.getProtocol())) {
         log.trace("save: %s", url);
-        String imgFileName = SX.getValidImageFilename(url.getPath());
+        String imgFileName = Content.asValidImageFilename(url.getPath());
         Mat imgContent = getContent();
         if (Imgcodecs.imwrite(imgFileName, imgContent)) {
           urlImg = url;

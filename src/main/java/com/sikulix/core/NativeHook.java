@@ -99,7 +99,7 @@ public class NativeHook implements NativeKeyListener, NativeMouseInputListener, 
 
   private void init() {
     if (eventQueueSize == 0) {
-      mainMonitor = SX.getLOCALDEVICE().getMonitor(SX.getLOCALDEVICE().getMonitorID());
+      mainMonitor = SX.getSXLOCALDEVICE().getMonitor(SX.getSXLOCALDEVICE().getMonitorID());
       distMPos = Math.sqrt(mainMonitor.getWidth() * mainMonitor.getWidth() +
               mainMonitor.getHeight() * mainMonitor.getHeight()) / 150;
       eventQueueSize = (int) ((mainMonitor.width + mainMonitor.height) / distMPos * 1.2);

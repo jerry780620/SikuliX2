@@ -17,7 +17,10 @@ import org.sikuli.script.Screen;
 
 import java.awt.Color;
 import java.io.File;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -70,8 +73,8 @@ public class TestAll {
 
   @BeforeClass
   public static void setUpClass() {
-    if (SX.existsFile(SX.getFolder(SX.getSXAPP()))) {
-      Content.deleteFileOrFolder(SX.getFolder(SX.getSXAPP()), new Content.FileFilter() {
+    if (Content.existsFile(Content.asFolder(SX.getSXAPP()))) {
+      Content.deleteFileOrFolder(Content.asFolder(SX.getSXAPP()), new Content.FileFilter() {
         @Override
         public boolean accept(File entry) {
           if (entry.getAbsolutePath().contains("SX2/Images") ||
@@ -82,7 +85,7 @@ public class TestAll {
         }
       });
     }
-    SX.setBaseClass();
+    SX.setSXBASECLASS();
     SX.setOption("SX.withHook", "no");
   }
 
@@ -110,7 +113,7 @@ public class TestAll {
       log.info("hook started");
     }
     button = Symbol.button(200, 80).setColor(Color.gray).fill(Color.lightGray).setLine(4);
-    Do.setBundlePath(jarImagePathClass);
+    Do.resetImagePath(jarImagePathClass);
   }
 
   @After
@@ -122,7 +125,7 @@ public class TestAll {
     resetDefaultScreen();
     Events.waitUntilFinished();
     Events.reset();
-    if (SX.isSetLOCALDEVICE()) {
+    if (SX.isSetSXLOCALDEVICE()) {
       Do.on().removeEvents();
       Do.on().resetMatches();
     }
@@ -216,49 +219,59 @@ public class TestAll {
   public void test_011_startup_native_load() {
     currentTest = "test_011_startup_native_load";
     Element.getNewMat();
-    File test = SX.getFileExists(SX.getSXNATIVE(), SX.sxLibsCheckName);
+    File test = Content.asFileExists(SX.getSXNATIVE(), SX.sxLibsCheckName);
     result = SX.sxLibsCheckName;
-    assert !SX.isNull(test) && SX.existsFile(test);
+    assert !SX.isNull(test) && Content.existsFile(test);
   }
 
   @Test
   public void test_020_getBundlePath() {
     currentTest = "test_020_getBundlePath";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     String bundlePath = Do.getBundlePath();
     result = bundlePath;
-    assert SX.existsFile(bundlePath);
+    assert Content.existsFile(bundlePath);
   }
 
   @Test
   public void test_021_setBundlePathFile() {
     currentTest = "test_021_setBundlePathFile";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     boolean success = Do.setBundlePath(mavenRoot, defaultImagePath);
     result = Do.getBundlePath();
-    success &= SX.existsFile(result);
+    success &= Content.existsFile(result);
     assert success;
   }
 
   @Test
   public void test_022_setBundlePathByClass() {
     currentTest = "test_022_setBundlePathByClass";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     boolean success = Do.setBundlePath(jarImagePathDefault);
     result = Do.getBundlePath();
-    success &= SX.existsFile(result);
+    success &= Content.existsFile(result);
     assert success;
   }
 
   @Test
   public void test_023_setBundlePathJarByClass() {
     currentTest = "test_023_setBundlePathJarByClass";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     boolean success = Do.setBundlePath(jarImagePathClass);
     result = Do.getBundlePath();
-    success &= SX.existsFile(result);
+    success &= Content.existsFile(result);
     assert success : "Reference class not found in classpath";
   }
 
   @Test
   public void test_024_setBundlePathHttp() {
     currentTest = "test_024_setBundlePathHttp";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     boolean success = Do.setBundlePath(gitRoot, "src/main/resources/" + defaultImagePath);
     result = Do.getBundlePath();
     success &= (gitImagePath).equals(result);
@@ -268,6 +281,8 @@ public class TestAll {
   @Test
   public void test_029_getImagePath() {
     currentTest = "test_029_getImagePath";
+    Picture.clearPath();
+    assert Picture.getPath().length == 0;
     Do.setBundlePath(jarImagePathDefault);
     Do.addImagePath(jarImagePathClass);
     Do.addImagePath(gitImagePath);
@@ -1070,11 +1085,42 @@ public class TestAll {
   //log.startTimer();
   @Test
   public void test_999_someThingToTest() {
-    //log.startTimer();
+    log.startTimer();
     currentTest = "test_0999_someThingToTest";
     if (!SX.onTravisCI() && log.isGlobalLevel(log.TRACE)) {
       if (!SX.isHeadless()) {
 // start
+        Class clazz = SX.class;
+        Method[] declaredMethods = clazz.getDeclaredMethods();
+        List<String> publicMethods = new ArrayList<>();
+        for (Method method : declaredMethods) {
+          int modifiers = method.getModifiers();
+          if (Modifier.isPublic(modifiers)) {
+            int parameterCount = method.getParameterCount();
+            String name = method.getName();
+            String prefix = "";
+            if (name.startsWith("get")) {
+              prefix = "get";
+            } else if (name.startsWith("set")) {
+              prefix = "set";
+            } else if (name.startsWith("isSet")) {
+              prefix = "isSet";
+            } else if (name.startsWith("is")) {
+              prefix = "is";
+            } else if (name.startsWith("has")) {
+              prefix = "has";
+            } else if (name.startsWith("as")) {
+              prefix = "as";
+            }
+            name = name.substring(prefix.length());
+            publicMethods.add(set("%s%s-%d", name, SX.isSet(prefix) ? "-" + prefix : "", parameterCount));
+          }
+        }
+        Collections.sort(publicMethods);
+        for (String entry : publicMethods) {
+          if (entry.startsWith("SX")) continue;
+          log.p("%s", entry);
+        }
 //end
       } else {
         result = "headless: not testing";

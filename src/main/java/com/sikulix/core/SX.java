@@ -105,7 +105,7 @@ public class SX {
             } catch (IOException ex) {
             }
           }
-          for (File f : getFile(getSYSTEMP()).listFiles(new FilenameFilter() {
+          for (File f : Content.asFile(getSXSYSTEMP()).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
               File aFile = new File(dir, name);
@@ -122,7 +122,7 @@ public class SX {
               }
               if (name.toLowerCase().contains("sikuli")) {
                 if (name.contains("Sikulix_")) {
-                  if (isObsolete || aFile.equals(getFile(getTEMP()))) {
+                  if (isObsolete || aFile.equals(Content.asFile(getSXTEMP()))) {
                     return true;
                   }
                 } else {
@@ -144,7 +144,7 @@ public class SX {
 
       //<editor-fold desc="*** sx lock (not active)">
       if (shouldLock) {
-        File fLock = new File(getSYSTEMP(), "SikuliX2-i-s-r-u-n-n-i-n-g");
+        File fLock = new File(getSXSYSTEMP(), "SikuliX2-i-s-r-u-n-n-i-n-g");
         String shouldTerminate = "";
         try {
           fLock.createNewFile();
@@ -304,13 +304,13 @@ public class SX {
       } else {
         if (isWindows()) {
           if (jn.endsWith(".exe")) {
-            setASAPP(true);
+            setSXRUNNINGASAPP(true);
             runningJar = false;
             appType = "as application .exe";
           }
         } else if (isMac()) {
           if (fSxBase.getAbsolutePath().contains("SikuliX.app/Content")) {
-            setASAPP(true);
+            setSXRUNNINGASAPP(true);
             appType = "as application .app";
             if (!fSxBase.getAbsolutePath().startsWith("/Applications")) {
               appType += " (not from /Applications folder)";
@@ -324,16 +324,16 @@ public class SX {
     }
   }
 
-  private static String baseClass = "";
+  private static String BASECLASS = "";
 
-  public static void setBaseClass() {
+  public static void setSXBASECLASS() {
     log.trace("setBaseClass: start");
     StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
     boolean takeit = false;
     for (StackTraceElement traceElement : stackTrace) {
       String tName = traceElement.getClassName();
       if (takeit) {
-        baseClass = tName;
+        BASECLASS = tName;
         break;
       }
       if (tName.equals(SX.class.getName())) {
@@ -342,8 +342,8 @@ public class SX {
     }
   }
 
-  public static String getBaseClass() {
-    return baseClass;
+  public static String getSXBASECLASS() {
+    return BASECLASS;
   }
   //</editor-fold>
 
@@ -375,7 +375,7 @@ public class SX {
     File aFile = null;
     String argFile = getArg("o");
     if (!isNull(argFile)) {
-      aFile = getFile(argFile);
+      aFile = Content.asFile(argFile);
       if (!aFile.isDirectory()) {
         if (aFile.exists()) {
           fOptions = aFile;
@@ -392,7 +392,7 @@ public class SX {
         if (isNull(sFile)) {
           continue;
         }
-        aFile = getFile(sFile);
+        aFile = Content.asFile(sFile);
         trace("loadOptions: check: %s", aFile);
         fOptions = new File(aFile, fnOptions);
         if (fOptions.exists()) {
@@ -464,7 +464,7 @@ public class SX {
 
   public static boolean saveOptions() {
     try {
-      sxOptions.write(new FileWriter(SX.getFile(SX.getSXSTORE(), "sxoptions.txt")));
+      sxOptions.write(new FileWriter(Content.asFile(SX.getSXSTORE(), "sxoptions.txt")));
     } catch (Exception e) {
       log.error("saveOptions: %s", e);
     }
@@ -535,35 +535,21 @@ public class SX {
       p("*** options dump end");
     }
   }
-
-  public static String getValidImageFilename(String fname) {
-    String validEndings = ".png.jpg.jpeg.tiff.bmp";
-    String currentEnding = "";
-    String defaultEnding = ".png";
-    boolean shouldAddEnding = true;
-    if (fname.length() > 4) {
-      currentEnding = fname.substring(fname.length() - 4, fname.length());
-      if (validEndings.contains(currentEnding.toLowerCase())) {
-        shouldAddEnding = false;
-      }
-    }
-    return shouldAddEnding ? fname + defaultEnding : fname;
-  }
   //</editor-fold>
 
   //<editor-fold desc="06*** system/java version info">
-  static enum theSystem {
-    WIN, MAC, LUX, FOO
-  }
-
   /**
    * @return path seperator : or ;
    */
-  public String getSeparator() {
+  public static String getSeparator() {
     if (isWindows()) {
       return ";";
     }
     return ":";
+  }
+
+  static enum theSystem {
+    WIN, MAC, LUX, FOO
   }
 
   /**
@@ -572,34 +558,44 @@ public class SX {
    * @return info about the system running on
    */
 
-  public static String getSYSTEM() {
-    if (isNotSet(SXSYSTEM)) {
+  public static String getSXSYSTEM() {
+    if (isNotSet(SYSTEM)) {
       String osName = System.getProperty("os.name");
       String osVersion = System.getProperty("os.version");
       if (osName.toLowerCase().startsWith("windows")) {
-        SXSYS = theSystem.WIN;
+        SYS = theSystem.WIN;
         osName = "Windows";
-        SXSYSshort = "windows";
       } else if (osName.toLowerCase().startsWith("mac")) {
-        SXSYS = theSystem.MAC;
+        SYS = theSystem.MAC;
         osName = "Mac OSX";
-        SXSYSshort = "mac";
       } else if (osName.toLowerCase().startsWith("linux")) {
-        SXSYS = theSystem.LUX;
+        SYS = theSystem.LUX;
         osName = "Linux";
-        SXSYSshort = "linux";
       } else {
         terminate(-1, "running on not supported System: %s (%s)", osName, osVersion);
       }
       SYSTEMVERSION = osVersion;
-      SXSYSTEM = String.format("%s (%s)", osName, SYSTEMVERSION);
+      SYSTEM = String.format("%s (%s)", osName, SYSTEMVERSION);
     }
-    return SXSYSTEM;
+    return SYSTEM;
   }
 
-  static String SXSYSTEM = "";
-  static theSystem SXSYS = theSystem.FOO;
-  static String SXSYSshort = "";
+  static String SYSTEM = "";
+  static theSystem SYS = theSystem.FOO;
+
+  private static String getSYSGENERIC() {
+    getSXSYSTEM();
+    if (isWindows()) {
+      return "windows";
+    }
+    if (isMac()) {
+      return "mac";
+    }
+    if (isLinux()) {
+      return "linux";
+    }
+    return "unknown";
+  }
 
 
   /**
@@ -607,9 +603,9 @@ public class SX {
    *
    * @return the running system's version info
    */
-  public static String getSYSTEMVERSION() {
+  public static String getSXSYSTEMVERSION() {
     if (isNotSet(SYSTEMVERSION)) {
-      getSYSTEM();
+      getSXSYSTEM();
     }
     return SYSTEMVERSION;
   }
@@ -620,75 +616,75 @@ public class SX {
    * @return true/false
    */
   public static boolean isWindows() {
-    getSYSTEM();
-    return theSystem.WIN.equals(SXSYS);
+    getSXSYSTEM();
+    return theSystem.WIN.equals(SYS);
   }
 
   /**
    * @return true/false
    */
   public static boolean isLinux() {
-    getSYSTEM();
-    return theSystem.LUX.equals(SXSYS);
+    getSXSYSTEM();
+    return theSystem.LUX.equals(SYS);
   }
 
   /**
    * @return true/false
    */
   public static boolean isMac() {
-    getSYSTEM();
-    return theSystem.MAC.equals(SXSYS);
+    getSXSYSTEM();
+    return theSystem.MAC.equals(SYS);
   }
 
   public static boolean isOSX10() {
-    return getSYSTEMVERSION().startsWith("10.10.") || getSYSTEMVERSION().startsWith("10.11.");
+    return getSXSYSTEMVERSION().startsWith("10.10.") || getSXSYSTEMVERSION().startsWith("10.11.");
   }
 
   /**
-   * ***** Property ASAPP *****
+   * ***** Property RUNNINGASAPP *****
    *
    * @return to know wether running as .exe/.app
    */
-  public static boolean asAPP() {
-    if (isNotSet(ASAPP)) {
+  public static boolean isSXRUNNINGASAPP() {
+    if (isNotSet(RUNNINGASAPP)) {
       //TODO getASAPP detect running as .exe/.app
-      setASAPP(false);
+      setSXRUNNINGASAPP(false);
     }
-    return ASAPP;
+    return RUNNINGASAPP;
   }
 
-  static Boolean ASAPP = null;
+  static Boolean RUNNINGASAPP = null;
 
-  public static boolean setASAPP(boolean val) {
-    ASAPP = val;
-    return ASAPP;
+  public static boolean setSXRUNNINGASAPP(boolean val) {
+    RUNNINGASAPP = val;
+    return RUNNINGASAPP;
   }
 
 
   /**
-   * ***** Property JHOME *****
+   * ***** Property JAVAHOME *****
    *
    * @return the Java installation path
    */
-  public static String getJHOME() {
-    if (isNotSet(JHOME)) {
+  public static String getSXJAVAHOME() {
+    if (isNotSet(JAVAHOME)) {
       String jhome = System.getProperty("java.home");
       if (isSet(jhome)) {
-        JHOME = jhome;
+        JAVAHOME = jhome;
       }
     }
-    return JHOME;
+    return JAVAHOME;
   }
 
-  static String JHOME = "";
+  static String JAVAHOME = "";
 
   /**
-   * ***** Property JVERSION *****
+   * ***** Property JAVAVERSION *****
    *
    * @return Java version info
    */
-  public static String getJVERSION() {
-    if (isNotSet(JVERSION)) {
+  public static String getSXJAVAVERSION() {
+    if (isNotSet(JAVAVERSION)) {
       String vJava = System.getProperty("java.runtime.version");
       String vVM = System.getProperty("java.vm.version");
       String vClass = System.getProperty("java.class.version");
@@ -699,7 +695,7 @@ public class SX {
       }
       try {
         javaVersion = Integer.parseInt(vJava.substring(2, 3));
-        JVERSION = String.format("Java %s vm %s class %s arch %s", vJava, vVM, vClass, vSysArch);
+        JAVAVERSION = String.format("Java %s vm %s class %s arch %s", vJava, vVM, vClass, vSysArch);
       } catch (Exception ex) {
         terminate(1, "Java version not detected: JavaSystemProperty::java.runtime.version = %s", vJava);
       }
@@ -707,31 +703,31 @@ public class SX {
         terminate(1, "Java version must be 7 or 8");
       }
     }
-    return JVERSION;
+    return JAVAVERSION;
   }
 
-  static String JVERSION = "";
+  static String JAVAVERSION = "";
 
   /**
-   * ***** Property JVERSIONint *****
+   * ***** Property JAVAVERSIONNUMBER *****
    *
    * @return Java version number
    */
-  public static int getJVERSIONint() {
-    if (isNotSet(JVERSIONint)) {
-      JVERSIONint = Integer.parseInt(getJVERSION().substring(5, 6));
+  public static int getSXJAVAVERSIONNUMBER() {
+    if (isNotSet(JAVAVERSIONNUMBER)) {
+      JAVAVERSIONNUMBER = Integer.parseInt(getSXJAVAVERSION().substring(5, 6));
     }
-    return JVERSIONint;
+    return JAVAVERSIONNUMBER;
   }
 
-  static Integer JVERSIONint = null;
+  static Integer JAVAVERSIONNUMBER = null;
 
   public static boolean isJava8() {
-    return getJVERSIONint() > 7;
+    return getSXJAVAVERSIONNUMBER() > 7;
   }
 
   public static boolean isJava7() {
-    return getJVERSIONint() > 6;
+    return getSXJAVAVERSIONNUMBER() > 6;
   }
   //</editor-fold>
 
@@ -742,13 +738,13 @@ public class SX {
    *
    * @return the path for temporary stuff according to JavaSystemProperty::java.io.tmpdir
    */
-  public static String getSYSTEMP() {
+  public static String getSXSYSTEMP() {
     if (isNotSet(SYSTEMP)) {
       String tmpdir = System.getProperty("java.io.tmpdir");
-      if (tmpdir == null || tmpdir.isEmpty() || !getFile(tmpdir).exists()) {
+      if (tmpdir == null || tmpdir.isEmpty() || !Content.asFile(tmpdir).exists()) {
         terminate(1, "JavaSystemProperty::java.io.tmpdir not valid");
       }
-      SYSTEMP = getFile(tmpdir).getAbsolutePath();
+      SYSTEMP = Content.asFile(tmpdir).getAbsolutePath();
     }
     return SYSTEMP;
   }
@@ -760,13 +756,13 @@ public class SX {
    *
    * @return the path to the area where Sikulix stores temporary stuff (located in SYSTEMP)
    */
-  public static String getTEMP() {
+  public static String getSXTEMP() {
     if (isNotSet(TEMP)) {
-      File fSXTempPath = getFile(getSYSTEMP(), String.format("Sikulix_%d", getRandomInt()));
-      for (String aFile : getFile(SYSTEMP).list()) {
+      File fSXTempPath = Content.asFile(getSXSYSTEMP(), String.format("Sikulix_%d", getRandomInt()));
+      for (String aFile : Content.asFile(SYSTEMP).list()) {
         if ((aFile.startsWith("Sikulix") && (new File(aFile).isFile()))
                 || (aFile.startsWith("jffi") && aFile.endsWith(".tmp"))) {
-          Content.deleteFileOrFolder(new File(getSYSTEMP(), aFile));
+          Content.deleteFileOrFolder(new File(getSXSYSTEMP(), aFile));
         }
       }
       fSXTempPath.mkdirs();
@@ -799,10 +795,10 @@ public class SX {
   public static String getUSERHOME() {
     if (isNotSet(USERHOME)) {
       String aFolder = System.getProperty("user.home");
-      if (aFolder == null || aFolder.isEmpty() || !getFile(aFolder).exists()) {
+      if (aFolder == null || aFolder.isEmpty() || !Content.asFile(aFolder).exists()) {
         terminate(-1, "getUSERHOME: JavaSystemProperty::user.home not valid");
       }
-      USERHOME = getFile(aFolder).getAbsolutePath();
+      USERHOME = Content.asFile(aFolder).getAbsolutePath();
     }
     return USERHOME;
   }
@@ -820,7 +816,7 @@ public class SX {
       if (aFolder == null || aFolder.isEmpty() || !new File(aFolder).exists()) {
         terminate(-1, "getUSERWORK: JavaSystemProperty::user.dir not valid");
       }
-      USERWORK = getFolder(aFolder).getAbsolutePath();
+      USERWORK = Content.asFolder(aFolder).getAbsolutePath();
     }
     return USERWORK;
   }
@@ -829,12 +825,12 @@ public class SX {
 
 
   /**
-   * ***** Property SYSAPP *****
+   * ***** Property SYSAPPDATA *****
    *
    * @return the system specific path to the users application storage area
    */
-  public static String getSYSAPP() {
-    if (isNotSet(SYSAPP)) {
+  public static String getSXSYSAPPDATA() {
+    if (isNotSet(SYSAPPDATA)) {
       String appDataMsg = "";
       File fSysAppPath = null;
       if (isWindows()) {
@@ -842,19 +838,19 @@ public class SX {
         if (sDir == null || sDir.isEmpty()) {
           terminate(1, "setSYSAPP: Windows: %s not valid", "%APPDATA%");
         }
-        fSysAppPath = getFile(sDir);
+        fSysAppPath = Content.asFile(sDir);
       } else if (isMac()) {
-        fSysAppPath = getFile(getUSERHOME(), "Library/Application Support");
+        fSysAppPath = Content.asFile(getUSERHOME(), "Library/Application Support");
       } else if (isLinux()) {
-        fSysAppPath = getFile(getUSERHOME());
+        fSysAppPath = Content.asFile(getUSERHOME());
         SXAPPdefault = ".Sikulix/SX2";
       }
-      SYSAPP = fSysAppPath.getAbsolutePath();
+      SYSAPPDATA = fSysAppPath.getAbsolutePath();
     }
-    return SYSAPP;
+    return SYSAPPDATA;
   }
 
-  static String SYSAPP = "";
+  static String SYSAPPDATA = "";
   //</editor-fold>
 
   //<editor-fold desc="09*** SX app data folder">
@@ -879,23 +875,23 @@ public class SX {
   static String SXWEBDOWNLOADdefault = "http://download.sikulix.com";
 
   /**
-   * ***** Property SXAPP *****
+   * ***** Property SXAPPSTORE *****
    *
-   * @return the path to the area in SYSAPP where Sikulix stores all stuff
+   * @return the path to the area in SYSAPPDATA where Sikulix stores all stuff
    */
   public static String getSXAPP() {
-    if (isNotSet(SXAPP)) {
-      File fDir = getFile(getSYSAPP(), SXAPPdefault);
+    if (isNotSet(SXAPPSTORE)) {
+      File fDir = Content.asFile(getSXSYSAPPDATA(), SXAPPdefault);
       fDir.mkdirs();
       if (!fDir.exists()) {
         terminate(1, "setSXAPP: folder not available or cannot be created: %s", fDir);
       }
-      SXAPP = fDir.getAbsolutePath();
+      SXAPPSTORE = fDir.getAbsolutePath();
     }
-    return SXAPP;
+    return SXAPPSTORE;
   }
 
-  static String SXAPP = "";
+  static String SXAPPSTORE = "";
   static String SXAPPdefault = "Sikulix/SX2";
 
   /**
@@ -906,7 +902,7 @@ public class SX {
   public static String getSXDOWNLOADS() {
     if (isNotSet(SXDOWNLOADS)) {
       String fBase = getSXAPP();
-      File fDir = getFile(fBase, SXDOWNLOADSdefault);
+      File fDir = Content.asFile(fBase, SXDOWNLOADSdefault);
       setSXDOWNLOADS(fDir);
     }
     return SXDOWNLOADS;
@@ -916,11 +912,11 @@ public class SX {
   static String SXDOWNLOADSdefault = "Downloads";
 
   public static String setSXDOWNLOADS(Object oDir) {
-    File fDir = getFile(oDir, null);
+    File fDir = Content.asFile(oDir, null);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXDOWNLOADS: not posssible or not valid: %s", fDir);
     }
     SXDOWNLOADS = fDir.getAbsolutePath();
@@ -935,7 +931,7 @@ public class SX {
   public static String getSXNATIVE() {
     if (isNotSet(SXNATIVE)) {
       String fBase = getSXAPP();
-      File fDir = getFolder(fBase, SXNATIVEdefault);
+      File fDir = Content.asFolder(fBase, SXNATIVEdefault);
       setSXNATIVE(fDir);
     }
     return SXNATIVE;
@@ -945,8 +941,8 @@ public class SX {
   static String SXNATIVEdefault = "Native";
 
   public static String setSXNATIVE(Object oDir) {
-    File fDir = getFolder(oDir);
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    File fDir = Content.asFolder(oDir);
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXNATIVE: not posssible or not valid: %s", fDir);
     }
     SXNATIVE = fDir.getAbsolutePath();
@@ -961,7 +957,7 @@ public class SX {
   public static String getSXLIB() {
     if (isNotSet(SXLIB)) {
       String fBase = getSXAPP();
-      File fDir = getFile(fBase, SXLIBdefault);
+      File fDir = Content.asFile(fBase, SXLIBdefault);
       setSXLIB(fDir);
     }
     return SXLIB;
@@ -971,11 +967,11 @@ public class SX {
   static String SXLIBdefault = "LIB";
 
   public static String setSXLIB(Object oDir) {
-    File fDir = getFile(oDir, null);
+    File fDir = Content.asFile(oDir, null);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXLIB: not posssible or not valid: %s", fDir);
     }
     SXLIB = fDir.getAbsolutePath();
@@ -990,7 +986,7 @@ public class SX {
   public static String getSXSTORE() {
     if (isNotSet(SXSTORE)) {
       String fBase = getSXAPP();
-      File fDir = getFile(fBase, SXSTOREdefault);
+      File fDir = Content.asFile(fBase, SXSTOREdefault);
       setSXSTORE(fDir);
     }
     return SXSTORE;
@@ -1000,8 +996,8 @@ public class SX {
   static String SXSTOREdefault = "Store";
 
   public static String setSXSTORE(Object oDir) {
-    File fDir = getFolder(oDir);
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    File fDir = Content.asFolder(oDir);
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXSTORE: not posssible or not valid: %s", fDir);
     }
     SXSTORE = fDir.getAbsolutePath();
@@ -1016,7 +1012,7 @@ public class SX {
   public static String getSXEDITOR() {
     if (isNotSet(SXEDITOR)) {
       String fBase = getSXAPP();
-      File fDir = getFolder(fBase, SXEDITORdefault);
+      File fDir = Content.asFolder(fBase, SXEDITORdefault);
       setSXEDITOR(fDir);
     }
     return SXEDITOR;
@@ -1026,11 +1022,11 @@ public class SX {
   static String SXEDITORdefault = "Extensions/SXEditor";
 
   public static String setSXEDITOR(Object oDir) {
-    File fDir = getFile(oDir);
+    File fDir = Content.asFile(oDir);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXEDITOR: not posssible or not valid: %s", fDir);
     }
     SXEDITOR = fDir.getAbsolutePath();
@@ -1045,7 +1041,7 @@ public class SX {
   public static String getSXTESSERACT() {
     if (isNotSet(SXTESSERACT)) {
       String fBase = getSXAPP();
-      File fDir = getFile(fBase, SXTESSERACTdefault);
+      File fDir = Content.asFile(fBase, SXTESSERACTdefault);
       setSXTESSERACT(fDir);
     }
     return SXTESSERACT;
@@ -1055,11 +1051,11 @@ public class SX {
   static String SXTESSERACTdefault = "TESSERACT";
 
   public static String setSXTESSERACT(Object oDir) {
-    File fDir = getFile(oDir, null);
+    File fDir = Content.asFile(oDir, null);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXTESSERACT: not posssible or not valid: %s", fDir);
     }
     SXTESSERACT = fDir.getAbsolutePath();
@@ -1067,55 +1063,34 @@ public class SX {
   }
 
   /**
-   * ***** Property SXEXTENSIONS *****
+   * ***** Property EXTENSIONSFOLDER *****
    *
    * @return path to folder containg extensions or plugins
    */
-  public static String getSXEXTENSIONS() {
-    if (isNotSet(SXEXTENSIONS)) {
+  public static String getSXEXTENSIONSFOLDER() {
+    if (isNotSet(EXTENSIONSFOLDER)) {
       String fBase = getSXAPP();
-      File fDir = getFile(fBase, SXEXTENSIONSdefault);
+      File fDir = Content.asFile(fBase, EXTENSIONSdefault);
       setSXEXTENSIONS(fDir);
     }
-    return SXEXTENSIONS;
+    return EXTENSIONSFOLDER;
   }
 
-  static String SXEXTENSIONS = "";
-  static String SXEXTENSIONSdefault = "Extensions";
+  static String EXTENSIONSFOLDER = "";
+  static String EXTENSIONSdefault = "Extensions";
 
   static String[] theExtensions = new String[]{"selenium4sikulix"};
 
   public static String setSXEXTENSIONS(Object oDir) {
-    File fDir = getFile(oDir, null);
+    File fDir = Content.asFile(oDir, null);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXEXTENSIONS: not posssible or not valid: %s", fDir);
     }
-    SXEXTENSIONS = fDir.getAbsolutePath();
-    return SXEXTENSIONS;
-  }
-
-  public static File asExtension(String fpJar) {
-    File fJarFound = new File(Content.normalizeAbsolute(fpJar, false));
-    if (!fJarFound.exists()) {
-      String fpCPEntry = Content.isOnClasspath(fJarFound.getName());
-      if (fpCPEntry == null) {
-        fJarFound = new File(getSXEXTENSIONS(), fpJar);
-        if (!fJarFound.exists()) {
-          fJarFound = new File(getSXLIB(), fpJar);
-          if (!fJarFound.exists()) {
-            fJarFound = null;
-          }
-        }
-      } else {
-        fJarFound = new File(fpCPEntry, fJarFound.getName());
-      }
-    } else {
-      return null;
-    }
-    return fJarFound;
+    EXTENSIONSFOLDER = fDir.getAbsolutePath();
+    return EXTENSIONSFOLDER;
   }
 
   /**
@@ -1126,7 +1101,7 @@ public class SX {
   public static String getSXIMAGES() {
     if (isNotSet(SXIMAGES)) {
       String fBase = getSXAPP();
-      File fDir = getFolder(fBase, SXIMAGESdefault);
+      File fDir = Content.asFolder(fBase, SXIMAGESdefault);
       setSXIMAGES(fDir);
     }
     return SXIMAGES;
@@ -1136,11 +1111,11 @@ public class SX {
   static String SXIMAGESdefault = "Images";
 
   public static String setSXIMAGES(Object oDir) {
-    File fDir = getFile(oDir, null);
+    File fDir = Content.asFile(oDir, null);
     if (isSet(fDir)) {
       fDir.mkdirs();
     }
-    if (isNotSet(fDir) || !existsFile(fDir) || !fDir.isDirectory()) {
+    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXIMAGES: not posssible or not valid: %s", fDir);
     }
     SXIMAGES = fDir.getAbsolutePath();
@@ -1203,7 +1178,7 @@ public class SX {
    *
    * @return Sikulix build timestamp
    */
-  public static String getBUILD() {
+  public static String getSXBUILD() {
     if (isNotSet(BUILD)) {
       getVERSION();
     }
@@ -1231,7 +1206,7 @@ public class SX {
    *
    * @return Version_Build
    */
-  public static String getSTAMP() {
+  public static String getSXSTAMP() {
     if (isNotSet(STAMP)) {
       getVERSION();
     }
@@ -1265,18 +1240,18 @@ public class SX {
    *
    * @return
    */
-  public static LocalDevice getLOCALDEVICE() {
+  public static LocalDevice getSXLOCALDEVICE() {
     if (isNotSet(LOCALDEVICE)) {
       LOCALDEVICE = (LocalDevice) new LocalDevice().start();
     }
     return LOCALDEVICE;
   }
 
-  public static boolean isSetLOCALDEVICE() {
+  public static boolean isSetSXLOCALDEVICE() {
     return SX.isNotNull(LOCALDEVICE);
   }
 
-  public static void setLOCALDEVICE(LocalDevice LOCALDEVICE) {
+  public static void setSXLOCALDEVICE(LocalDevice LOCALDEVICE) {
     SX.LOCALDEVICE = LOCALDEVICE;
   }
 
@@ -1383,7 +1358,7 @@ public class SX {
     if (areLibsExported) {
       return;
     }
-    File fSXNative = getFile(getSXNATIVE());
+    File fSXNative = Content.asFile(getSXNATIVE());
     if (!new File(fSXNative, sxLibsCheckName).exists()) {
       debug("exportLibraries: folder empty or has wrong content");
       Content.deleteFileOrFolder(fSXNative);
@@ -1396,7 +1371,7 @@ public class SX {
         terminate(1, "exportLibraries: folder not available: %s", fSXNative);
       }
       debug("exportLibraries: new folder: %s", fSXNative);
-      fpJarLibs = "/Native/" + SXSYSshort;
+      fpJarLibs = "/Native/" + getSYSGENERIC();
       extractLibraries(sxGlobalClassReference, fpJarLibs, fSXNative);
       try {
         extractLibraries(Class.forName("com.sikulix.opencv.Sikulix"), fpJarLibs, fSXNative);
@@ -1465,14 +1440,14 @@ public class SX {
       }
       exportLibraries();
       if (isWindows()) {
-        addToWindowsSystemPath(getFile(getSXNATIVE()));
-        if (!checkJavaUsrPath(getFile(getSXNATIVE()))) {
+        addToWindowsSystemPath(Content.asFile(getSXNATIVE()));
+        if (!checkJavaUsrPath(Content.asFile(getSXNATIVE()))) {
           error("exportLibraries: JavaUserPath: see errors - might not work and crash later");
         }
         String lib = "jawt.dll";
-        File fJawtDll = new File(getFile(getSXNATIVE()), lib);
+        File fJawtDll = new File(Content.asFile(getSXNATIVE()), lib);
         Content.deleteFileOrFolder(fJawtDll);
-        Content.xcopy(new File(getJHOME() + "/bin/" + lib), fJawtDll);
+        Content.xcopy(new File(getSXJAVAHOME() + "/bin/" + lib), fJawtDll);
         if (!fJawtDll.exists()) {
           terminate(1, "exportLibraries: problem copying %s", fJawtDll);
         }
@@ -1568,9 +1543,9 @@ public class SX {
     p("***** show environment (%s)", getVERSIONSHOW());
     p("user.home: %s", getUSERHOME());
     p("user.dir (work dir): %s", getUSERWORK());
-    p("java.io.tmpdir: %s", getSYSTEMP());
-    p("running on %s", getSYSTEM());
-    p(getJVERSION());
+    p("java.io.tmpdir: %s", getSXSYSTEMP());
+    p("running on %s", getSXSYSTEM());
+    p(getSXJAVAVERSION());
     p("app data folder: %s", getSXAPP());
     p("libs folder: %s", getSXNATIVE());
     if (runningJar) {
@@ -1582,182 +1557,6 @@ public class SX {
 //      JythonHelper.get().showSysPath();
 //    }
     p("***** show environment end");
-  }
-
-  private static File getFileMake(Object... args) {
-    if (args.length < 1) {
-      return null;
-    }
-    Object oPath = args[0];
-    Object oSub = "";
-    if (args.length > 1) {
-      oSub = args[1];
-    }
-    File fPath = null;
-    if (isNotSet(oSub)) {
-      fPath = new File(oPath.toString());
-    } else {
-      fPath = new File(oPath.toString(), oSub.toString());
-    }
-    try {
-      fPath = fPath.getCanonicalFile();
-    } catch (IOException e) {
-      error("getFile: %s %s error(%s)", oPath, oSub, e.getMessage());
-    }
-    return fPath;
-  }
-
-  public static File getFile(Object... args) {
-    return getFileMake(args);
-  }
-
-  public static File getFileExists(Object... args) {
-    File fPath = getFileMake(args);
-    if (!isNull(fPath) && !fPath.exists()) {
-      error("getFile: %s error(not available)", fPath);
-      return null;
-    }
-    return fPath;
-  }
-
-  public static File getFolder(Object... args) {
-    File aFile = getFileMake(args);
-    if (isNotSet(aFile)) {
-      return null;
-    }
-    if (aFile.isDirectory()) {
-      return aFile;
-    }
-    aFile.mkdirs();
-    if (aFile.isDirectory()) {
-      return aFile;
-    }
-    error("getFolder: %s error(... does not exist)", aFile);
-    return null;
-  }
-
-  public static URL getFileURL(Object... args) {
-    File aFile = getFile(args);
-    if (isNotSet(aFile)) {
-      return null;
-    }
-    try {
-      return new URL("file:" + aFile.toString());
-    } catch (MalformedURLException e) {
-      error("getFileURL: %s error(%s)", aFile, e.getMessage());
-      return null;
-    }
-  }
-
-  public static URL getJarURL(Object... args) {
-    if (args.length == 0) {
-      return null;
-    }
-    File aFile = getFile(args[0]);
-    if (isNotSet(aFile)) {
-      return null;
-    }
-    String sSub = "";
-    if (args.length > 1) {
-      sSub = args[1].toString();
-    }
-    try {
-      return new URL("jar:file:" + aFile.toString() + "!/" + sSub);
-    } catch (MalformedURLException e) {
-      error("getJarURL: %s %s error(%s)", aFile, sSub, e.getMessage());
-      return null;
-    }
-  }
-
-  public static URL getNetURL(Object... args) {
-    //TODO implment getNetURL()
-    URL netURL = null;
-    String path = null;
-    if (args.length > 0) {
-      String sSub = "";
-      if (args.length > 1) {
-        sSub = args[1].toString();
-        if (sSub.startsWith("/")) {
-          sSub = sSub.substring(1);
-        }
-      }
-      if (args[0] instanceof String) {
-        path = (String) args[0];
-        if (!path.startsWith("http://") && !path.startsWith("https://")) {
-          path = "http://" + path;
-        }
-      } else if (args[0] instanceof URL && ((URL) args[0]).getProtocol().startsWith("http")) {
-        path = ((URL) args[0]).toExternalForm();
-      } else {
-        log.error("getNetURL: invalid arg0: %s", args[0]);
-        return null;
-      }
-      if (!sSub.isEmpty()) {
-        if (!path.endsWith("/")) {
-          path += "/";
-        }
-        path += sSub;
-      }
-      try {
-        return new URL(path);
-      } catch (MalformedURLException e) {
-        error("getURL: %s %s error(%s)", args[0], (args.length > 1 ? args[1] : ""), e.getMessage());
-        return null;
-      }
-    }
-    return netURL;
-  }
-
-  public static URL getURL(Object... args) {
-    URL theURL = null;
-    if (args.length > 0) {
-      if (args[0] instanceof String) {
-        String path = (String) args[0];
-        if (path.startsWith("http")) {
-          return getNetURL(args);
-        } else if (path.startsWith("jar:") || path.endsWith(".jar")) {
-          return getJarURL(args);
-        } else {
-          return getFileURL(args);
-        }
-      } else if (args[0] instanceof URL) {
-        if (((URL) args[0]).getProtocol().startsWith("http")) {
-          theURL = getNetURL(args);
-        } else {
-          log.error("getURL: not implemented: %s", args[0]);
-        }
-      } else if (args[0] instanceof File) {
-        log.error("getURL: File not implemented: %s", args[0]);
-      } else {
-        log.error("getURL: invalid arg: %s", args[0]);
-      }
-    }
-    return theURL;
-  }
-
-  public static boolean existsFile(Object aPath) {
-    if (aPath instanceof URL) {
-      //TODO implement existsFile(URL)
-      return false;
-    }
-    return (getFile(aPath).exists());
-  }
-
-  public static boolean existsFile(Object aPath, String name) {
-    if (aPath instanceof URL) {
-      //TODO implement existsFile(URL, name)
-      return false;
-    }
-    return (getFile(aPath, name).exists());
-  }
-
-  public static boolean existsImageFile(Object aPath, String name) {
-    if (aPath instanceof URL) {
-      //TODO implement existsImageFile(URL, name)
-      return false;
-    }
-    File imgFile = new File(getValidImageFilename(getFile(aPath, name).getAbsolutePath()));
-    return (imgFile.exists());
   }
 
   public static boolean isNull(Object obj) {
@@ -1835,154 +1634,6 @@ public class SX {
       Thread.sleep((int) (time * 1000));
     } catch (InterruptedException ex) {
     }
-  }
-
-  public static Element at() {
-    PointerInfo mp = MouseInfo.getPointerInfo();
-    if (mp != null) {
-      return new Element(MouseInfo.getPointerInfo().getLocation());
-    } else {
-      error("not possible to get mouse position (PointerInfo == null)");
-      return null;
-    }
-  }
-  //</editor-fold>
-
-  //<editor-fold desc="14*** candidates for Content">
-  public static String canonicalPath(File aFile) {
-    try {
-      return aFile.getCanonicalPath();
-    } catch (IOException e) {
-      return aFile.getAbsolutePath();
-    }
-  }
-
-  public static URL makeURL(Object... args) {
-    if (args.length < 1) {
-      return null;
-    }
-
-    URL url = null;
-    String proto = "file:";
-    String sURL = "";
-
-    String fpMain = "";
-
-    Object objMain = args[0];
-    String strMain = "";
-    String fpSubOrAlt = args.length > 1 ? (String) args[1] : "";
-    if (objMain instanceof File) {
-      fpMain = canonicalPath((File) objMain);
-    } else if (objMain instanceof String) {
-      strMain = (String) objMain;
-      if ((strMain).startsWith("http")) {
-        proto = "http:";
-        fpMain = strMain;
-      } else {
-        fpMain = canonicalPath(getFile(strMain));
-        // check for class based path
-        if (isSet(strMain) &&
-                !new File(fpMain).exists() && !new File(strMain).isAbsolute()) {
-          url = makeURLfromClass(strMain, fpSubOrAlt);
-        }
-      }
-    }
-    if (isNotSet(url)) {
-      if ("file:".equals(proto)) {
-        if (fpMain.endsWith(".jar")) {
-          if (!existsFile(fpMain)) {
-            log.error("makeURL: not exists: %s", fpMain);
-          }
-          fpMain = "file:" + fpMain + "!/";
-          proto = "jar:";
-        }
-      }
-      if (isSet(fpSubOrAlt)) {
-        if ("file:".equals(proto)) {
-          fpMain = canonicalPath(getFile(fpMain, fpSubOrAlt));
-        } else {
-          if (!fpSubOrAlt.startsWith("/") && !fpMain.endsWith("/")) {
-            fpSubOrAlt = "/" + fpSubOrAlt;
-          }
-          fpMain += fpSubOrAlt;
-        }
-      }
-      if ("http:".equals(proto)) {
-        sURL = fpMain;
-      } else {
-        if ("file:".equals(proto) && !existsFile(fpMain)) {
-          log.error("makeURL: not exists: %s", fpMain);
-        }
-        sURL = proto + fpMain;
-      }
-      try {
-        url = new URL(sURL);
-      } catch (MalformedURLException e) {
-        log.error("makeURL: not valid: %s %s", objMain, (isNotSet(fpSubOrAlt) ? "" : ", " + fpSubOrAlt));
-      }
-    }
-    return url;
-  }
-
-  private static URL makeURLfromClass(String fpMain, String fpAlt) {
-    URL url = null;
-    Class cls = null;
-    String klassName;
-    String fpSubPath = "";
-    int n = fpMain.indexOf("/");
-    if (n > 0) {
-      klassName = fpMain.substring(0, n);
-      if (n < fpMain.length() - 2) {
-        fpSubPath = fpMain.substring(n + 1);
-      }
-    } else {
-      klassName = fpMain;
-    }
-    if (".".equals(klassName)) {
-      if (isSet(SX.getBaseClass())) {
-        klassName = SX.getBaseClass();
-      } else {
-        klassName = sxGlobalClassReference.getName();
-      }
-    }
-    try {
-      cls = Class.forName(klassName);
-    } catch (ClassNotFoundException ex) {
-      log.error("makeURLfromPath: class %s not found on classpath.", klassName);
-    }
-    if (cls != null) {
-      CodeSource codeSrc = cls.getProtectionDomain().getCodeSource();
-      if (codeSrc != null && codeSrc.getLocation() != null) {
-        url = codeSrc.getLocation();
-        if (url.getPath().endsWith(".jar")) {
-          url = getJarURL(url.getPath(), fpSubPath);
-        } else {
-          if (isNotSet(fpAlt)) {
-            url = getFileURL(url.getPath(), fpSubPath);
-          } else {
-            url = getFileURL(fpAlt);
-          }
-        }
-      }
-    }
-    return url;
-  }
-
-  public static String makePath(URL uPath) {
-    String sPath = "";
-    String proto = "";
-    sPath = uPath.getPath();
-    proto = uPath.getProtocol();
-    if ("file".equals(proto) || "jar".equals(proto)) {
-      if ("jar".equals(proto)) {
-        sPath = sPath.replaceFirst("file:", "");
-        sPath = sPath.split("!/")[0];
-      }
-      sPath = getFile(sPath).getAbsolutePath();
-    } else {
-      sPath = uPath.toExternalForm();
-    }
-    return sPath;
   }
   //</editor-fold>
 }

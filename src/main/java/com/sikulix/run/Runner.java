@@ -45,7 +45,7 @@ public class Runner {
   }
 
   public static boolean setScriptPath(Object... args) {
-    scriptPath = SX.getURL(args);
+    scriptPath = Content.asURL(args);
     return SX.isNotNull(scriptPath);
   }
 
@@ -191,11 +191,11 @@ public class Runner {
       if (SX.isNotSet(scriptFolder)) {
         scriptFolder = "/Scripts";
       }
-      URL url = SX.getNetURL(httpRoot, scriptFolder + "/" + scriptName);
+      URL url = Content.asNetURL(httpRoot, scriptFolder + "/" + scriptName);
       if (SX.isNotNull(url)) {
         for (ScriptType scriptType : scriptTypes.keySet()) {
           String scriptFile = scriptName + scriptTypes.get(scriptType);
-          scriptText = Content.downloadScriptToString(SX.getURL(url, scriptFile));
+          scriptText = Content.downloadScriptToString(Content.asURL(url, scriptFile));
           if (SX.isSet(scriptText)) {
             type = scriptType;
             break;

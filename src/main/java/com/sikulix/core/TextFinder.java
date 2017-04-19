@@ -18,7 +18,7 @@ public class TextFinder {
   private static final SXLog log = SX.getLogger("SX.TextFinder");
 
   private Tesseract1 tess = null;
-  private String datapath = SX.getSYSAPP() + "/Sikulix/SikulixTesseract";
+  private String datapath = SX.getSXSYSAPPDATA() + "/Sikulix/SikulixTesseract";
   private boolean valid = false;
 
   public TextFinder() {

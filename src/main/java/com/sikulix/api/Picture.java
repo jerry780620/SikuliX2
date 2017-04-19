@@ -10,7 +10,6 @@ import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -292,7 +291,7 @@ public class Picture extends Element {
 
   private static void initPath() {
     if (imagePath.isEmpty()) {
-      imagePath.add(SX.getFileURL(SX.getSXIMAGES()));
+      imagePath.add(Content.asFileURL(SX.getSXIMAGES()));
       bundlePathIsFile = true;
     }
   }
@@ -304,11 +303,11 @@ public class Picture extends Element {
   public static boolean setBundlePath(Object... args) {
     initPath();
     if (args.length == 0) {
-      imagePath.set(0, SX.getFileURL(SX.getSXIMAGES()));
+      imagePath.set(0, Content.asFileURL(SX.getSXIMAGES()));
       bundlePathIsFile = true;
       return true;
     }
-    URL urlPath = SX.makeURL(args);
+    URL urlPath = Content.makeURL(args);
     if (SX.isSet(urlPath)) {
       if ("file".equals(urlPath.getProtocol()) && urlPath.getPath().contains("test-classes")) {
         try {
@@ -340,7 +339,7 @@ public class Picture extends Element {
 
   public static String getBundlePath() {
     initPath();
-    return SX.makePath(imagePath.get(0));
+    return Content.makePath(imagePath.get(0));
   }
 
   public static boolean isBundlePathFile() {
@@ -371,7 +370,7 @@ public class Picture extends Element {
     int n = 0;
     String sPath;
     for (URL uPath : imagePath) {
-      sPath = SX.makePath(uPath);
+      sPath = Content.makePath(uPath);
       if (sPath.contains(filter)) {
         return n;
       }
@@ -384,14 +383,14 @@ public class Picture extends Element {
     if (n < 0 || n > imagePath.size() - 1) {
       n = 0;
     }
-    return SX.makePath(imagePath.get(n));
+    return Content.makePath(imagePath.get(n));
   }
 
   public static boolean setPath(int n, String fpPath) {
     if (n < 0 || n > imagePath.size() - 1) {
       return false;
     }
-    URL urlPath = SX.makeURL(fpPath);
+    URL urlPath = Content.makeURL(fpPath);
     if (SX.isSet(urlPath)) {
       imagePath.set(n, urlPath);
       return true;
@@ -403,7 +402,7 @@ public class Picture extends Element {
     if (n < 0 || n > imagePath.size() - 1) {
       n = 0;
     }
-    return SX.makePath(imagePath.get(n));
+    return Content.makePath(imagePath.get(n));
   }
 
   public static int addPath(Object... args) {
@@ -411,7 +410,7 @@ public class Picture extends Element {
     if (args.length == 0) {
       return -1;
     }
-    URL urlPath = SX.makeURL(args);
+    URL urlPath = Content.makeURL(args);
     if (SX.isSet(urlPath)) {
       imagePath.add(urlPath);
       return imagePath.size() - 1;
@@ -506,7 +505,7 @@ public class Picture extends Element {
 //        log.error("getValidName: image file ending %s not supported: %s", ending, name);
 //      }
 //    }
-    return SX.getValidImageFilename(name);
+    return Content.asValidImageFilename(name);
   }
 
   public static boolean handleImageMissing(String type, Finder.PossibleMatch possibleMatch) {

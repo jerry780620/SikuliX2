@@ -215,7 +215,7 @@ public class Tool {
         if (new File(userwork, "pom.xml").exists()) {
           bundlePath = new File(userwork, "src/main/resources/Images").getAbsolutePath();
         } else {
-          bundlePath = SX.getFolder(SX.getSXSTORE(), "Images").getAbsolutePath();
+          bundlePath = Content.asFolder(SX.getSXSTORE(), "Images").getAbsolutePath();
         }
         log.trace("%s", userwork);
       }
@@ -1169,7 +1169,7 @@ public class Tool {
         return;
       }
     }
-    if (SX.existsImageFile(savePath, imageToSave.getName())) {
+    if (Content.existsImageFile(savePath, imageToSave.getName())) {
       if (!Do.popAsk(new File(savePath, imageToSave.getName()).getAbsolutePath() +
               "\nOverwrite image file?", "SikuliX Tool::ImageSave", box)) {
         return;

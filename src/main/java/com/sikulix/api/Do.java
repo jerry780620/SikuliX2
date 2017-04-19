@@ -572,6 +572,11 @@ public class Do {
   public static String[] getImagePath() {
     return Picture.getPath();
   }
+
+  public static String resetImagePath(Object... args) {
+    Picture.resetPath(args);
+    return Picture.getBundlePath();
+  }
   //</editor-fold>
 
   //<editor-fold desc="SX Do Clipboard">
@@ -985,7 +990,7 @@ public class Do {
 
   private static Element getDefaultScreenAsElement() {
     if (SX.isNull(defaultScreenAsElement)) {
-      defaultScreenAsElement = new Element(SX.getLOCALDEVICE().getMonitor().getBounds());
+      defaultScreenAsElement = new Element(SX.getSXLOCALDEVICE().getMonitor().getBounds());
       defaultScreenAsElement.setName("SCREEN0");
     }
     return defaultScreenAsElement;
@@ -1056,11 +1061,11 @@ public class Do {
   }
 
   public static IDevice getLocalDevice() {
-    return SX.getLOCALDEVICE();
+    return SX.getSXLOCALDEVICE();
   }
 
   public static NativeHook getHook() {
-    return SX.getLOCALDEVICE().getHook();
+    return SX.getSXLOCALDEVICE().getHook();
   }
 
   public static boolean isMouseposition(NativeHook hook, int x, int y) {

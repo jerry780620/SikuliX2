@@ -36,6 +36,24 @@ public class SXLog {
   static long globalStart = 0;
   static long globalLap = 0;
 
+  public String getCurrentMethodName() {
+    StackTraceElement stackTraceElements[] = (new Throwable()).getStackTrace();
+    StackTraceElement stackTraceElement = stackTraceElements[1];
+    String methodName = stackTraceElement.getMethodName();
+    return methodName;
+  }
+
+  public Map<String, String> getCaller() {
+    Map<String, String> caller = new HashMap<>();
+    StackTraceElement stackTraceElements[] = (new Throwable()).getStackTrace();
+    StackTraceElement stackTraceElement = stackTraceElements[2];
+    caller.put("class", stackTraceElement.getClassName());
+    caller.put("method", stackTraceElement.getMethodName());
+    caller.put("line", "" + stackTraceElement.getLineNumber());
+    caller.put("file", stackTraceElement.getFileName());
+    return caller;
+  }
+
   public void startTimer() {
     globalStart = new Date().getTime();
     globalLap = globalStart;
@@ -123,10 +141,6 @@ public class SXLog {
     return globalLevel >= level;
   }
 
-  public void off() {
-    currentLevel = OFF;
-  }
-
   public void reset() {
     currentLevel = initLevel;
   }
@@ -193,25 +207,12 @@ public class SXLog {
     System.exit(retval);
   }
 
-  private boolean shouldLog(int level) {
-    if (level == FATAL) {
-      return true;
-    }
-    if (globalLevel == OFF) {
-      return false;
-    }
-    if (level < OFF || currentLevel == OFF) {
-      return logError;
-    }
-    return currentLevel >= level || globalLevel >= level;
-  }
-
   private void log(int level, String message, Object... args) {
     String msgPlus = "";
     if (level == FATAL) {
       msgPlus = "terminating";
     }
-    if (shouldLog(level)) {
+    if (isLogging(level)) {
       message = getTranslation(message, msgPlus);
       if (!message.startsWith("!")) {
         message = String.format(message, args).replaceAll("\\n", " ");
@@ -232,13 +233,40 @@ public class SXLog {
     }
   }
 
+  private boolean isLogging(int level) {
+    if (level == FATAL) {
+      return true;
+    }
+    if (globalLevel == OFF) {
+      return false;
+    }
+    if (level < OFF || currentLevel == OFF) {
+      return logError;
+    }
+    return currentLevel >= level || globalLevel >= level;
+  }
+
+  //<editor-fold desc="translation">
   private static Map<String, Properties> translateProps = new HashMap<>();
 
-  private boolean translation = true;
   private static boolean globalTranslation = true;
+
+  public static void setGlobalTranslation(boolean state) {
+    globalTranslation = state;
+  }
+
+  public static boolean isGlobalTranslation() {
+    return globalTranslation;
+  }
+
+  private boolean translation = true;
 
   public void setTranslation(boolean state) {
     translation = state;
+  }
+
+  public boolean isTranslation() {
+    return translation;
   }
 
   private String getTranslation(String msg, String msgPlus) {
@@ -326,5 +354,6 @@ public class SXLog {
     }
     return msg;
   }
+  //</editor-fold>
 }
 
