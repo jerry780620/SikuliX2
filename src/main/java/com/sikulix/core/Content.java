@@ -49,13 +49,13 @@ public class Content {
       InetAddress a = null;
       int p = -1;
       if (phost != null) {
-        a = getProxyAddress(phost);
+        a = getAddress(phost);
       }
       if (a == null && padr != null) {
-        a = getProxyAddress(padr);
+        a = getAddress(padr);
       }
       if (a != null && pport != null) {
-        p = getProxyPort(pport);
+        p = getPort(pport);
       }
       if (a != null && p > 1024) {
         proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(a, p));
@@ -73,9 +73,9 @@ public class Content {
     String adr = null;
     int p = -1;
     if (pName != null) {
-      a = getProxyAddress(pName);
+      a = getAddress(pName);
       if (a == null) {
-        a = getProxyAddress(pName);
+        a = getAddress(pName);
         if (a != null) {
           adr = pName;
         }
@@ -84,7 +84,7 @@ public class Content {
       }
     }
     if (a != null && pPort != null) {
-      p = getProxyPort(pPort);
+      p = getPort(pPort);
     }
     if (a != null && p > 1024) {
       log.debug("Proxy stored: %s : %d", a.getHostAddress(), p);
@@ -103,7 +103,7 @@ public class Content {
     return false;
   }
 
-  public static int getPort(String p) {
+  public static int getProxyPort(String p) {
     int port;
     int pDefault = 50000;
     if (p != null) {
@@ -121,7 +121,7 @@ public class Content {
     return port;
   }
 
-  public static int getProxyPort(String p) {
+  private static int getPort(String p) {
     int port;
     int pDefault = 8080;
     if (p != null) {
@@ -136,7 +136,7 @@ public class Content {
     return port;
   }
 
-  public static String getAddress(String arg) {
+  public static String getProxyAddress(String arg) {
     try {
       if (arg == null) {
         return InetAddress.getLocalHost().getHostAddress();
@@ -147,7 +147,7 @@ public class Content {
     }
   }
 
-  public static InetAddress getProxyAddress(String arg) {
+  private static InetAddress getAddress(String arg) {
     try {
       return InetAddress.getByName(arg);
     } catch (UnknownHostException ex) {

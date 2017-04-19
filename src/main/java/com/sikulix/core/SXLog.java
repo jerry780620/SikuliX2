@@ -172,6 +172,10 @@ public class SXLog {
     System.out.println(String.format(msg, args));
   }
 
+  public void p() {
+    System.out.println(String.format("******** intended breakpoint ********* %s", getCurrentMethodName()));
+  }
+
   public void info(String message, Object... args) {
     log(INFO, message, args);
   }

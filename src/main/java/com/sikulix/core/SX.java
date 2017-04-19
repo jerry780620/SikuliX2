@@ -20,6 +20,7 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.sikulix.core.SX.NATIVES.HOTKEY;
 import static com.sikulix.core.SX.NATIVES.OPENCV;
@@ -1479,17 +1480,22 @@ public class SX {
   //</editor-fold>
 
   //<editor-fold desc="13*** global helper methods">
-  public static List<String> listPublicMethods(Class clazz) {
+  public static Map<String, String> listPublicMethods(Class clazz) {
     return listPublicMethods(clazz, true);
   }
 
-  public static List<String> listPublicMethods(Class clazz, boolean silent) {
+  public static Map<String, String> listPublicMethods(Class clazz, boolean silent) {
     Method[] declaredMethods = clazz.getDeclaredMethods();
-    List<String> publicMethods = new ArrayList<>();
+    Map<String, String> publicMethods = new HashMap<>();
     for (Method method : declaredMethods) {
       int modifiers = method.getModifiers();
       if (Modifier.isPublic(modifiers)) {
         int parameterCount = method.getParameterCount();
+        Class<?>[] exceptionTypes = method.getExceptionTypes();
+        String throwsException = "";
+        if (exceptionTypes.length > 0) {
+          throwsException = "x";
+        }
         String name = method.getName();
         String prefix = "";
         if (name.startsWith("get")) {
@@ -1520,12 +1526,13 @@ public class SX {
           prefix = "equals";
         }
         name = name.substring(prefix.length());
-        publicMethods.add(String.format("%s%s-%d", name, SX.isSet(prefix) ? "-" + prefix : "", parameterCount));
+        publicMethods.put(String.format("%s%s-%d%s", name, SX.isSet(prefix) ? "-" + prefix : "",
+                parameterCount, throwsException), method.toString());
       }
     }
-    Collections.sort(publicMethods);
     if (!silent) {
-      for (String entry : publicMethods) {
+      List<String> publicMethodsKeys = publicMethods.keySet().stream().sorted().collect(Collectors.toList());
+      for (String entry : publicMethodsKeys) {
         if (entry.startsWith("SX") || entry.startsWith("Option")) continue;
         log.p("%s", entry);
       }

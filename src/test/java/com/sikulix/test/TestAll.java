@@ -1085,11 +1085,12 @@ public class TestAll {
   //log.startTimer();
   @Test
   public void test_999_someThingToTest() {
-    //log.startTimer();
+    log.startTimer();
     currentTest = "test_0999_someThingToTest";
     if (!SX.isTravisCI() && log.isGlobalLevel(log.TRACE)) {
       if (!SX.isHeadless()) {
 // start
+        SX.listPublicMethods(Content.class, false);
 //end
       } else {
         result = "headless: not testing";
