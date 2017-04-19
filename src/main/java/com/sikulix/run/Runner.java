@@ -13,6 +13,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,73 @@ public class Runner {
   public static boolean setScriptPath(Object... args) {
     scriptPath = Content.asURL(args);
     return SX.isNotNull(scriptPath);
+  }
+
+  public static File[] getScriptFile(File fScriptFolder) {
+    if (fScriptFolder == null) {
+      return null;
+    }
+    String scriptName;
+    String scriptType = "";
+    String fpUnzippedSkl = null;
+    File[] scriptFiles = null;
+
+    if (fScriptFolder.getName().endsWith(".skl") || fScriptFolder.getName().endsWith(".zip")) {
+      fpUnzippedSkl = Content.unzipSKL(fScriptFolder.getAbsolutePath());
+      if (fpUnzippedSkl == null) {
+        return null;
+      }
+      scriptType = "sikuli-zipped";
+      fScriptFolder = new File(fpUnzippedSkl);
+    }
+
+    int pos = fScriptFolder.getName().lastIndexOf(".");
+    if (pos == -1) {
+      scriptName = fScriptFolder.getName();
+      scriptType = "sikuli-plain";
+    } else {
+      scriptName = fScriptFolder.getName().substring(0, pos);
+      scriptType = fScriptFolder.getName().substring(pos + 1);
+    }
+
+    boolean success = true;
+    if (!fScriptFolder.exists()) {
+      if ("sikuli-plain".equals(scriptType)) {
+        fScriptFolder = new File(fScriptFolder.getAbsolutePath() + ".sikuli");
+        if (!fScriptFolder.exists()) {
+          success = false;
+        }
+      } else {
+        success = false;
+      }
+    }
+    if (!success) {
+      log.error("Not a valid Sikuli script project:\n%s", fScriptFolder.getAbsolutePath());
+      return null;
+    }
+    if (scriptType.startsWith("sikuli")) {
+      scriptFiles = fScriptFolder.listFiles(new FileFilterScript(scriptName + "."));
+      if (scriptFiles == null || scriptFiles.length == 0) {
+        log.error("Script project %s \n has no script file %s.xxx", fScriptFolder, scriptName);
+        return null;
+      }
+    } else if ("jar".equals(scriptType)) {
+      log.error("Sorry, script projects as jar-files are not yet supported;");
+      //TODO try to load and run as extension
+      return null; // until ready
+    }
+    return scriptFiles;
+  }
+
+  private static class FileFilterScript implements FilenameFilter {
+    private String scriptName;
+    public FileFilterScript(String scriptName) {
+      this.scriptName = scriptName;
+    }
+    @Override
+    public boolean accept(File dir, String fileName) {
+      return fileName.startsWith(scriptName);
+    }
   }
 
   public static Object run(Object... args) {

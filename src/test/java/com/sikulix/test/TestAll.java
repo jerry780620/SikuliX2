@@ -1085,48 +1085,11 @@ public class TestAll {
   //log.startTimer();
   @Test
   public void test_999_someThingToTest() {
-    log.startTimer();
+    //log.startTimer();
     currentTest = "test_0999_someThingToTest";
     if (!SX.isTravisCI() && log.isGlobalLevel(log.TRACE)) {
       if (!SX.isHeadless()) {
 // start
-        Class clazz = Content.class;
-        Method[] declaredMethods = clazz.getDeclaredMethods();
-        List<String> publicMethods = new ArrayList<>();
-        for (Method method : declaredMethods) {
-          int modifiers = method.getModifiers();
-          if (Modifier.isPublic(modifiers)) {
-            int parameterCount = method.getParameterCount();
-            String name = method.getName();
-            String prefix = "";
-            if (name.startsWith("get")) {
-              prefix = "get";
-            } else if (name.startsWith("set")) {
-              prefix = "set";
-            } else if (name.startsWith("isSet")) {
-              prefix = "isSet";
-            } else if (name.startsWith("is")) {
-              prefix = "is";
-            } else if (name.startsWith("has")) {
-              prefix = "has";
-            } else if (name.startsWith("as")) {
-              prefix = "as";
-            } else if (name.startsWith("load")) {
-              prefix = "load";
-            } else if (name.startsWith("save")) {
-              prefix = "save";
-            } else if (name.startsWith("dump")) {
-              prefix = "dump";
-            }
-            name = name.substring(prefix.length());
-            publicMethods.add(set("%s%s-%d", name, SX.isSet(prefix) ? "-" + prefix : "", parameterCount));
-          }
-        }
-        Collections.sort(publicMethods);
-        for (String entry : publicMethods) {
-          if (entry.startsWith("SX") || entry.startsWith("Option")) continue;
-          log.p("%s", entry);
-        }
 //end
       } else {
         result = "headless: not testing";

@@ -339,7 +339,7 @@ public class Picture extends Element {
 
   public static String getBundlePath() {
     initPath();
-    return Content.makePath(imagePath.get(0));
+    return Content.asPath(imagePath.get(0));
   }
 
   public static boolean isBundlePathFile() {
@@ -370,7 +370,7 @@ public class Picture extends Element {
     int n = 0;
     String sPath;
     for (URL uPath : imagePath) {
-      sPath = Content.makePath(uPath);
+      sPath = Content.asPath(uPath);
       if (sPath.contains(filter)) {
         return n;
       }
@@ -383,7 +383,7 @@ public class Picture extends Element {
     if (n < 0 || n > imagePath.size() - 1) {
       n = 0;
     }
-    return Content.makePath(imagePath.get(n));
+    return Content.asPath(imagePath.get(n));
   }
 
   public static boolean setPath(int n, String fpPath) {
@@ -402,7 +402,7 @@ public class Picture extends Element {
     if (n < 0 || n > imagePath.size() - 1) {
       n = 0;
     }
-    return Content.makePath(imagePath.get(n));
+    return Content.asPath(imagePath.get(n));
   }
 
   public static int addPath(Object... args) {

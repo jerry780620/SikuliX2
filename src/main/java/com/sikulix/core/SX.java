@@ -14,6 +14,8 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.*;
@@ -1477,7 +1479,59 @@ public class SX {
   //</editor-fold>
 
   //<editor-fold desc="13*** global helper methods">
+  public static List<String> listPublicMethods(Class clazz) {
+    return listPublicMethods(clazz, true);
+  }
 
+  public static List<String> listPublicMethods(Class clazz, boolean silent) {
+    Method[] declaredMethods = clazz.getDeclaredMethods();
+    List<String> publicMethods = new ArrayList<>();
+    for (Method method : declaredMethods) {
+      int modifiers = method.getModifiers();
+      if (Modifier.isPublic(modifiers)) {
+        int parameterCount = method.getParameterCount();
+        String name = method.getName();
+        String prefix = "";
+        if (name.startsWith("get")) {
+          prefix = "get";
+        } else if (name.startsWith("set")) {
+          prefix = "set";
+        } else if (name.startsWith("isSet")) {
+          prefix = "isSet";
+        } else if (name.startsWith("is")) {
+          prefix = "is";
+        } else if (name.startsWith("has")) {
+          prefix = "has";
+        } else if (name.startsWith("as")) {
+          prefix = "as";
+        } else if (name.startsWith("load")) {
+          prefix = "load";
+        } else if (name.startsWith("save")) {
+          prefix = "save";
+        } else if (name.startsWith("dump")) {
+          prefix = "dump";
+        } else if (name.startsWith("make")) {
+          prefix = "make";
+        } else if (name.startsWith("eval")) {
+          prefix = "eval";
+        } else if (name.startsWith("exists")) {
+          prefix = "exists";
+        } else if (name.startsWith("equals")) {
+          prefix = "equals";
+        }
+        name = name.substring(prefix.length());
+        publicMethods.add(String.format("%s%s-%d", name, SX.isSet(prefix) ? "-" + prefix : "", parameterCount));
+      }
+    }
+    Collections.sort(publicMethods);
+    if (!silent) {
+      for (String entry : publicMethods) {
+        if (entry.startsWith("SX") || entry.startsWith("Option")) continue;
+        log.p("%s", entry);
+      }
+    }
+    return publicMethods;
+  }
   /**
    * check wether the given object is in JSON format as ["ID", ...]
    *
