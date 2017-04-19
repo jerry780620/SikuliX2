@@ -17,7 +17,7 @@ import org.sikuli.script.FindFailed;
  */
 public class ADBTest {
 
-  static SXLog log = SX.getLogger("SX.ADBTest");
+  static SXLog log = SX.getSXLog("SX.ADBTest");
 
   private static boolean runTests = true;
 

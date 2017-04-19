@@ -19,7 +19,7 @@ import java.util.TreeMap;
  */
 public class Key {
 
-  private static SXLog log = SX.getLogger("API.Key");
+  private static SXLog log = SX.getSXLog("API.Key");
 
   /**
    * add a hotkey and listener

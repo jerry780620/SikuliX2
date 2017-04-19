@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class HotkeyManager {
 
-  private static SXLog log = SX.getLogger("SX.HotkeyManager");
+  private static SXLog log = SX.getSXLog("SX.HotkeyManager");
 
   private static HotkeyManager instance = null;
   private Provider hotkeyProvider = null;

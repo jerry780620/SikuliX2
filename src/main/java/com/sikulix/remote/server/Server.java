@@ -17,7 +17,7 @@ public class Server extends NanoHTTPD {
   static SXLog log;
 
   static {
-    log = SX.getLogger("SXServer");
+    log = SX.getSXLog("SXServer");
     log.isSX();
     log.on(SXLog.TRACE);
   }

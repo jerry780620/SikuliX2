@@ -17,7 +17,7 @@ import java.util.TreeMap;
  */
 public class Keys {
 
-  private static SXLog log = SX.getLogger("SX.Keys");
+  private static SXLog log = SX.getSXLog("SX.Keys");
 
   static String[] keyVK = new String[]{
     //<editor-fold defaultstate="collapsed" desc="VK_xxx constant names and values Java 7">

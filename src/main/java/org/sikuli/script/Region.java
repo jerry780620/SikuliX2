@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Region extends Element {
-  private static SXLog log = SX.getLogger("API.REGION");
+  private static SXLog log = SX.getSXLog("API.REGION");
 
   //<editor-fold desc="housekeeping">
   private static eType eClazz = eType.REGION;

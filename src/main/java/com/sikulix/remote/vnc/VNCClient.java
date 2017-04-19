@@ -22,7 +22,7 @@ class VNCClient extends CConnection implements FdInStreamBlockCallback, Closeabl
   static SXLog log;
 
   static {
-    log = SX.getLogger("SX.VNCClient");
+    log = SX.getSXLog("SX.VNCClient");
     log.isSX();
     log.on(SXLog.TRACE);
   }

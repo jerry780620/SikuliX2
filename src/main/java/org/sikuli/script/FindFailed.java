@@ -13,7 +13,7 @@ import com.sikulix.core.SXLog;
  * and defines constants and settings for the feature FindFailedResponse
  */
 public class FindFailed extends SikuliException {
-	private static SXLog log = SX.getLogger("API.FINDFAILED");
+	private static SXLog log = SX.getSXLog("API.FINDFAILED");
 
 	/**
 	 * default FindFailedResponse is ABORT

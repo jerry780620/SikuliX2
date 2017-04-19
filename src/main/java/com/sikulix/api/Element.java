@@ -11,6 +11,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.sikuli.script.IScreen;
+import org.sikuli.script.Region;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -31,7 +32,22 @@ import java.util.List;
 public class Element implements Comparable<Element> {
 
   eType eClazz = eType.ELEMENT;
-  private static SXLog log = SX.getLogger("SX.ELEMENT");
+  private static SXLog log = SX.getSXLog("SX.ELEMENT");
+
+  public static boolean equalsRectangle(Object base, Rectangle rect) {
+    Rectangle rBase = null;
+    if (base instanceof Element) {
+      rBase = ((Element) base).getRectangle();
+    } else if (base instanceof Region) {
+      rBase = ((Region) base).getRect();
+    } else if (base instanceof Rectangle) {
+      rBase = (Rectangle) base;
+    }
+    if (SX.isNotNull(rBase)) {
+      return rBase.x == rect.x && rBase.y == rect.y && rBase.width == rect.width && rBase.height == rect.height;
+    }
+    return false;
+  }
 
   public eType getType() {
     return eClazz;

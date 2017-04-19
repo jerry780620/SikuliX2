@@ -23,7 +23,7 @@ public class Story {
   public static Font myFont;
 
   static {
-    log = SX.getLogger("SX.STORY");
+    log = SX.getSXLog("SX.STORY");
     log.isSX();
     log.on(SXLog.INFO);
     myFont = new Font(Font.DIALOG, Font.BOLD, 16);

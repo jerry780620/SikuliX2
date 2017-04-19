@@ -9,7 +9,7 @@ import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
 public class Image extends Picture {
-  private static SXLog log = SX.getLogger("API.IMAGE");
+  private static SXLog log = SX.getSXLog("API.IMAGE");
 
   public String toString() {
     return String.format("Image(%s)", getName());

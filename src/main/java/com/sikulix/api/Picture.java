@@ -33,7 +33,7 @@ public class Picture extends Element {
     return "I";
   }
 
-  private static SXLog log = SX.getLogger("SX.PICTURE");
+  private static SXLog log = SX.getSXLog("SX.PICTURE");
 
   //<editor-fold desc="*** construction">
   public Picture() {

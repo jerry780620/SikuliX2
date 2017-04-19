@@ -8,7 +8,7 @@ import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
 public class Handler {
-  private static SXLog log = SX.getLogger("SX.Handler");
+  private static SXLog log = SX.getSXLog("SX.Handler");
 
   public Handler() {
 

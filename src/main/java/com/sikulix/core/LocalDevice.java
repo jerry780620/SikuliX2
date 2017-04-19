@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class LocalDevice implements IDevice {
 
-  private static SXLog log = SX.getLogger("SX.LocalDevice");
+  private static SXLog log = SX.getSXLog("SX.LocalDevice");
 
   //<editor-fold desc="*** houskeeping ***">
   @Override

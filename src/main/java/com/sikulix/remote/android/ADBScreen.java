@@ -19,7 +19,7 @@ import java.awt.*;
  */
 public class ADBScreen extends Region implements IScreen {
 
-  static SXLog log = SX.getLogger("SX.ADBScreen");
+  static SXLog log = SX.getSXLog("SX.ADBScreen");
 
   private static String me = "ADBScreen: ";
 

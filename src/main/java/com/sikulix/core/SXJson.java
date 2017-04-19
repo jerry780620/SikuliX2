@@ -12,7 +12,7 @@ public class SXJson {
   static SXLog log;
 
   static {
-    log = SX.getLogger("SXJson");
+    log = SX.getSXLog("SXJson");
     log.isSX();
     log.on(SXLog.TRACE);
   }

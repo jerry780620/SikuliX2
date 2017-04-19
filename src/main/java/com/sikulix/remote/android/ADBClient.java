@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class ADBClient {
 
-  static SXLog log = SX.getLogger("SX.ADBClient");
+  static SXLog log = SX.getSXLog("SX.ADBClient");
 
   private static JadbConnection jadb = null;
   private static boolean shouldStopServer = false;

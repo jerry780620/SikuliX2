@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Parameters {
 
-  private static SXLog log = SX.getLogger("SX.Parameters");
+  private static SXLog log = SX.getSXLog("SX.Parameters");
 
   private Map<String, String> parameterTypes = new HashMap<>();
   private String[] parameterNames = null;

@@ -30,7 +30,7 @@ import static java.awt.event.KeyEvent.VK_ESCAPE;
 public class Tool {
 
   //<editor-fold desc="housekeeping">
-  private static final SXLog log = SX.getLogger("SX.Tool");
+  private static final SXLog log = SX.getSXLog("SX.Tool");
 
   //<editor-fold desc="fields">
   JFrame intro = new JFrame();
@@ -211,7 +211,7 @@ public class Tool {
     if (bundlePath.isEmpty()) {
       bundlePath = SX.getOption("Tool.bundlePath");
       if (bundlePath.isEmpty()) {
-        String userwork = SX.getUSERWORK();
+        String userwork = SX.getSXUSERWORK();
         if (new File(userwork, "pom.xml").exists()) {
           bundlePath = new File(userwork, "src/main/resources/Images").getAbsolutePath();
         } else {

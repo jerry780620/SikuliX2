@@ -34,7 +34,7 @@ public class NativeHook implements NativeKeyListener, NativeMouseInputListener, 
   static SXLog log;
 
   static {
-    log = SX.getLogger("SX.NativeHook");
+    log = SX.getSXLog("SX.NativeHook");
     log.isSX();
     log.on(SXLog.INFO);
   }

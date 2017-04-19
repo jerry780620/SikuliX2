@@ -21,7 +21,7 @@ public class Symbol extends Element {
 
 
 
-  private static SXLog log = SX.getLogger("SX." + eClazz.toString());
+  private static SXLog log = SX.getSXLog("SX." + eClazz.toString());
 
   //<editor-fold desc="*** construction">
   private void copyPlus(Element elem) {

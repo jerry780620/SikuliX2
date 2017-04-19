@@ -12,16 +12,14 @@ import com.sikulix.core.SXLog;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Runner {
 
-  static SXLog log = SX.getLogger("SX.Runner");
+  static SXLog log = SX.getSXLog("SX.Runner");
 
   public enum ScriptType {FROMUNKNOWN, JAVASCRIPT, PYTHON, RUBY, APPLESCRIPT, FROMJAR, FROMNET}
 

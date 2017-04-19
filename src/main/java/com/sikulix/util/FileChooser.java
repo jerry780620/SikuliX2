@@ -18,7 +18,7 @@ import java.io.File;
 
 public class FileChooser {
 
-  private static SXLog log = SX.getLogger("SX.FileChooser");
+  private static SXLog log = SX.getSXLog("SX.FileChooser");
 
   public static final int FILES = JFileChooser.FILES_ONLY;
   public static final int DIRS = JFileChooser.DIRECTORIES_ONLY;

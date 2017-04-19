@@ -29,7 +29,7 @@ public class TestAll {
 
   //<editor-fold desc="housekeeping">
   static final int logLevel = SX.INFO;
-  static SXLog log = SX.getLogger("TestSXAPI");
+  static SXLog log = SX.getSXLog("TestSXAPI");
   private Object result = "";
   private String currentTest = "";
   private static int nTest = 0;
@@ -207,7 +207,7 @@ public class TestAll {
   @Test
   public void test_010_startup() {
     currentTest = "test_010_startup_workdir";
-    String workDir = SX.getUSERWORK();
+    String workDir = SX.getSXUSERWORK();
     if (SX.isNotSet(workDir)) {
       SX.show();
     }
@@ -934,24 +934,24 @@ public class TestAll {
     Boolean returnBool;
     Element loc = new Element(300, 300);
     returnBool = Do.popup("click OK", "popup autoclose", 2, loc);
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       assert SX.isNull(returnBool) : "popup: return not null";
     }
     returnBool = Do.popAsk("click No or Yes", "popAsk autoclose", 2, loc);
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       assert SX.isNull(returnBool) : "popAsk: return not null";
     }
     returnBool = Do.popError("click OK", "popError autoclose", 2, loc);
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       assert SX.isNull(returnBool) : "popError: return not null";
     }
     String returnString;
     returnString = Do.input("give me some text", "text input autoclose", "preset", 2, loc);
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       assert SX.isNull(returnString) : "input: return not null";
     }
     returnString = Do.input("enter password", "hidden input autoclose", "preset", true, 2, loc);
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       assert SX.isNull(returnString) : "input hidden: return not null";
     }
   }
@@ -963,7 +963,7 @@ public class TestAll {
       Screen.showMonitors();
       Screen scr = new Screen();
       assert scr.getID() == 0;
-      assert SX.isRectangleEqual(scr, Do.on().getRectangle());
+      assert Element.equalsRectangle(scr, Do.on().getRectangle());
       scr.hover();
       Location center = scr.getCenter();
       assert Do.isMouseposition(hook, center.x, center.y);
@@ -1051,7 +1051,7 @@ public class TestAll {
   @Test
   public void test_800_basicTesseract() {
     currentTest = "test_800_basicTesseract";
-    if (!SX.onTravisCI()) {
+    if (!SX.isTravisCI()) {
       TextFinder textFinder = new TextFinder();
       assert textFinder.isValid() : "TextFinder not valid";
       String textRead = textFinder.read(new Picture("gui-button"));
@@ -1064,7 +1064,7 @@ public class TestAll {
   @Ignore
   public void test_601_basicVNC() {
     currentTest = "test_601_basicVNC";
-    if (!SX.isHeadless() && !SX.onTravisCI()) {
+    if (!SX.isHeadless() && !SX.isTravisCI()) {
       result = "capture something on a VNCScreen";
       IDevice vnc = new VNCDevice();
       vnc.start("192.168.2.24", 5900);
@@ -1087,10 +1087,10 @@ public class TestAll {
   public void test_999_someThingToTest() {
     log.startTimer();
     currentTest = "test_0999_someThingToTest";
-    if (!SX.onTravisCI() && log.isGlobalLevel(log.TRACE)) {
+    if (!SX.isTravisCI() && log.isGlobalLevel(log.TRACE)) {
       if (!SX.isHeadless()) {
 // start
-        Class clazz = SX.class;
+        Class clazz = Content.class;
         Method[] declaredMethods = clazz.getDeclaredMethods();
         List<String> publicMethods = new ArrayList<>();
         for (Method method : declaredMethods) {
@@ -1111,6 +1111,12 @@ public class TestAll {
               prefix = "has";
             } else if (name.startsWith("as")) {
               prefix = "as";
+            } else if (name.startsWith("load")) {
+              prefix = "load";
+            } else if (name.startsWith("save")) {
+              prefix = "save";
+            } else if (name.startsWith("dump")) {
+              prefix = "dump";
             }
             name = name.substring(prefix.length());
             publicMethods.add(set("%s%s-%d", name, SX.isSet(prefix) ? "-" + prefix : "", parameterCount));
@@ -1118,7 +1124,7 @@ public class TestAll {
         }
         Collections.sort(publicMethods);
         for (String entry : publicMethods) {
-          if (entry.startsWith("SX")) continue;
+          if (entry.startsWith("SX") || entry.startsWith("Option")) continue;
           log.p("%s", entry);
         }
 //end

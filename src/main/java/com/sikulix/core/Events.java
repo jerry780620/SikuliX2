@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Events {
-  private static SXLog log = SX.getLogger("SX.Events");
+  private static SXLog log = SX.getSXLog("SX.Events");
 
   //<editor-fold desc="housekeeping">
   private static Events instance = null;

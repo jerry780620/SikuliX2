@@ -15,7 +15,7 @@ import java.io.File;
  */
 public class TextFinder {
 
-  private static final SXLog log = SX.getLogger("SX.TextFinder");
+  private static final SXLog log = SX.getSXLog("SX.TextFinder");
 
   private Tesseract1 tess = null;
   private String datapath = SX.getSXSYSAPPDATA() + "/Sikulix/SikulixTesseract";

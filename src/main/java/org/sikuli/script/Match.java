@@ -9,7 +9,7 @@ import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
 public class Match extends Region {
-  private static SXLog log = SX.getLogger("API.MATCH");
+  private static SXLog log = SX.getSXLog("API.MATCH");
 
   public  Match(Element elem) {
     x = elem.x;

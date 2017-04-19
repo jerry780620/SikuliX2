@@ -36,7 +36,7 @@ public class Sikulix {
   //</editor-fold>
 
   public static void main(String[] args) {
-    log = SX.getLogger("SX.Sikulix");
+    log = SX.getSXLog("SX.Sikulix");
     options.addAll(Arrays.asList(args));
     if (options.isEmpty()) {
       log.p("SikuliX2::util.Sikulix::main: no args - nothing to do :-)");

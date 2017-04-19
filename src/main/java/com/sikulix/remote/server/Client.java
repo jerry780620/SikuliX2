@@ -18,7 +18,7 @@ public class Client {
 
   static SXLog log;
   static {
-    log = SX.getLogger("SXClient");
+    log = SX.getSXLog("SXClient");
     log.isSX();
     log.on(SXLog.TRACE);
   }

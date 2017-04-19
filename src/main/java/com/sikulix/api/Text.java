@@ -16,7 +16,7 @@ import com.sikulix.core.SXLog;
  */
 public class Text extends Element {
 
-  private static final SXLog log = SX.getLogger("SX.Text");
+  private static final SXLog log = SX.getSXLog("SX.Text");
 
   private String searchText = null;
   private String ocrText = null;

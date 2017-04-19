@@ -4,13 +4,12 @@
 
 package org.sikuli.script;
 
-import com.sikulix.api.Picture;
 import com.sikulix.api.Target;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
 public class Pattern extends Target {
-  private static SXLog log = SX.getLogger("API.PATTERN");
+  private static SXLog log = SX.getSXLog("API.PATTERN");
 
   public Pattern(String name) {
     super(name);

@@ -13,7 +13,7 @@ import org.bridj.ann.Library;
  */
 public class SXJNA {
 
-  private static SXLog log = SX.getLogger("SX.JNA");
+  private static SXLog log = SX.getSXLog("SX.JNA");
   /**
    * Direct access to Windows API kernel32.dll via BridJ
    */

@@ -17,7 +17,7 @@ public class Target extends Picture {
     return eClazz;
   }
 
-  private static SXLog log = SX.getLogger("SX." + eClazz.toString());
+  private static SXLog log = SX.getSXLog("SX." + eClazz.toString());
 
   //<editor-fold desc="***** construct">
   public Target() {

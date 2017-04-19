@@ -15,7 +15,7 @@ public class Window extends Element {
     return eClazz;
   }
 
-  private static SXLog log = SX.getLogger("SX." + eClazz.toString());
+  private static SXLog log = SX.getSXLog("SX." + eClazz.toString());
 
   private String application = "";
 

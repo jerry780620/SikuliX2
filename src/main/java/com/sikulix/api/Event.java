@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Event implements Comparable {
-  private static SXLog log = SX.getLogger("SX.Event");
+  private static SXLog log = SX.getSXLog("SX.Event");
 
   @Override
   public int compareTo(Object evt) {

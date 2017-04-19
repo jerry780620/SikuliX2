@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class Do {
 
-  private static SXLog log = SX.getLogger("SX.Do");
+  private static SXLog log = SX.getSXLog("SX.Do");
   private static String klazz = Do.class.getName();
 
   //<editor-fold desc="SX Do popat">

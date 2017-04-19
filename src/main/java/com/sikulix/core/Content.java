@@ -26,7 +26,7 @@ import java.util.zip.ZipOutputStream;
 
 public class Content {
 
-  private static SXLog log = SX.getLogger("SX.Content");
+  private static SXLog log = SX.getSXLog("SX.Content");
   private static int lvl = SXLog.DEBUG;
 
   public static void start() {
@@ -36,6 +36,8 @@ public class Content {
   public static final int DOWNLOAD_BUFFER_SIZE = 153600;
   private static SplashFrame _progress = null;
   private static final String EXECUTABLE = "#executable";
+
+  static final String fpContent = "sikulixcontent";
 
   public static int tryGetFileSize(URL aUrl) {
     HttpURLConnection conn = null;
@@ -1490,7 +1492,7 @@ public class Content {
     List<String> files = new ArrayList<String>();
 
     String tessdata = "/sikulixtessdata";
-    URL uContentList = SX.sxGlobalClassReference.getResource(tessdata + "/" + SX.fpContent);
+    URL uContentList = SX.sxGlobalClassReference.getResource(tessdata + "/" + fpContent);
     if (uContentList != null) {
       files = doResourceListWithList(tessdata, files, null);
       if (files.size() > 0) {
@@ -1678,7 +1680,7 @@ public class Content {
       uFolder = new URL(uFolder.toExternalForm().replaceAll(" ", "%20"));
     } catch (Exception ex) {
     }
-    URL uContentList = SX.sxGlobalClassReference.getResource(folder + "/" + SX.fpContent);
+    URL uContentList = SX.sxGlobalClassReference.getResource(folder + "/" + fpContent);
     if (uContentList != null) {
       return doResourceListWithList(folder, files, filter);
     }
@@ -1746,7 +1748,7 @@ public class Content {
   }
 
   public static List<String> doResourceListWithList(String folder, List<String> files, FilenameFilter filter) {
-    String content = extractResourceToString(folder, SX.fpContent, "");
+    String content = extractResourceToString(folder, fpContent, "");
     String[] contentList = content.split(content.indexOf("\r") != -1 ? "\r\n" : "\n");
     if (filter == null) {
       files.addAll(Arrays.asList(contentList));
@@ -1949,7 +1951,7 @@ public class Content {
     try {
       PrintWriter aPW = null;
       if (targetFolder != null) {
-        target = new File(targetFolder, SX.fpContent);
+        target = new File(targetFolder, fpContent);
         deleteFileOrFolder(target);
         target.getParentFile().mkdirs();
         aPW = new PrintWriter(target);
@@ -1992,7 +1994,7 @@ public class Content {
     try {
       PrintWriter aPW = null;
       if (targetFolder != null) {
-        target = new File(targetFolder, SX.fpContent);
+        target = new File(targetFolder, fpContent);
         deleteFileOrFolder(target);
         target.getParentFile().mkdirs();
         aPW = new PrintWriter(target);

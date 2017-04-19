@@ -4,15 +4,12 @@
 
 package org.sikuli.script;
 
-import com.sikulix.api.Do;
 import com.sikulix.api.Element;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
-import java.awt.*;
-
 public class Location extends Element {
-  private static SXLog log = SX.getLogger("API.LOCATION");
+  private static SXLog log = SX.getSXLog("API.LOCATION");
 
   private static eType eClazz = eType.LOCATION;
   public eType getType() {

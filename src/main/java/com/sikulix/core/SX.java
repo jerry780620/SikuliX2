@@ -4,18 +4,16 @@
 
 package com.sikulix.core;
 
-import com.sikulix.api.Element;
 //import com.sikulix.scripting.JythonHelper;
+
 import org.apache.commons.cli.*;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.sikuli.script.Region;
 
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.*;
@@ -67,19 +65,19 @@ public class SX {
     log.p(msg, args);
   }
 
-  public static SXLog getLogger(String className) {
-    return getLogger(className, null, -1);
+  public static SXLog getSXLog(String className) {
+    return getSXLog(className, null, -1);
   }
 
-  public static SXLog getLogger(String className, int level) {
-    return getLogger(className, null, level);
+  public static SXLog getSXLog(String className, int level) {
+    return getSXLog(className, null, level);
   }
 
-  public static SXLog getLogger(String className, String[] args) {
-    return getLogger(className, args, -1);
+  public static SXLog getSXLog(String className, String[] args) {
+    return getSXLog(className, args, -1);
   }
 
-  public static SXLog getLogger(String className, String[] args, int level) {
+  public static SXLog getSXLog(String className, String[] args, int level) {
     return new SXLog(className, args, level);
   }
   //</editor-fold>
@@ -105,7 +103,7 @@ public class SX {
             } catch (IOException ex) {
             }
           }
-          for (File f : Content.asFile(getSXSYSTEMP()).listFiles(new FilenameFilter() {
+          for (File f : new File(getSXSYSTEMP()).listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
               File aFile = new File(dir, name);
@@ -122,7 +120,7 @@ public class SX {
               }
               if (name.toLowerCase().contains("sikuli")) {
                 if (name.contains("Sikulix_")) {
-                  if (isObsolete || aFile.equals(Content.asFile(getSXTEMP()))) {
+                  if (isObsolete || aFile.equals(new File(getSXTEMP()))) {
                     return true;
                   }
                 } else {
@@ -174,13 +172,48 @@ public class SX {
       loadOptions();
 
       // *** get the version info
-      getVERSION();
+      getSXVERSION();
 
       // *** check how we are running
-      sxRunningAs();
+      APPTYPE = "from a jar";
+      String base = whereIs(sxGlobalClassReference);
+      if (isSet(base)) {
+        SXBASEJAR = base;
+        File jarBase = new File(base);
+        String jarBaseName = jarBase.getName();
+        File fJarBase = jarBase.getParentFile();
+        trace("sxRunningAs: runs as %s in: %s", jarBaseName, fJarBase.getAbsolutePath());
+        if (jarBaseName.contains("classes")) {
+          SXPROJEKTf = fJarBase.getParentFile().getParentFile();
+          trace("sxRunningAs: not jar - supposing Maven project: %s", SXPROJEKTf);
+          APPTYPE = "in Maven project from classes";
+        } else if ("target".equals(fJarBase.getName())) {
+          SXPROJEKTf = fJarBase.getParentFile().getParentFile();
+          trace("sxRunningAs: folder target detected - supposing Maven project: %s", SXPROJEKTf);
+          APPTYPE = "in Maven project from some jar";
+        } else {
+          if (isWindows()) {
+            if (jarBaseName.endsWith(".exe")) {
+              setSXRUNNINGASAPP(true);
+              APPTYPE = "as application .exe";
+            }
+          } else if (isMac()) {
+            if (fJarBase.getAbsolutePath().contains("SikuliX.app/Content")) {
+              setSXRUNNINGASAPP(true);
+              APPTYPE = "as application .app";
+              if (!fJarBase.getAbsolutePath().startsWith("/Applications")) {
+                APPTYPE += " (not from /Applications folder)";
+              }
+            }
+          }
+        }
+      } else {
+        terminate(1, "sxRunningAs: no valid Java context for SikuliX available "
+                + "(java.security.CodeSource.getLocation() is null)");
+      }
 
       //TODO i18n SXGlobal_sxinit_complete=complete %.3f
-      trace("!sxinit: exit %.3f", (new Date().getTime() - startTime) / 1000.0f);
+      trace("!sxinit: exit %.3f (%s)", (new Date().getTime() - startTime) / 1000.0f, APPTYPE);
     }
   }
   //</editor-fold>
@@ -248,80 +281,29 @@ public class SX {
   //</editor-fold>
 
   //<editor-fold desc="03*** check how we are running">
-  public static String sxGlobalClassNameIDE = "";
+  private static String APPTYPE = "?APPTYPE?";
 
-  private static boolean isJythonReady = false;
-  static String appType = "?appType?";
+  private static String SXBASEJAR = null;
+  private static File SXPROJEKTf;
 
-  static File fSxBaseJar;
-  static File fSxBase;
-  //TODO getter
-  public static File fSxProject;
-  static boolean runningInProject = false;
-  static final String fpContent = "sikulixcontent";
+  private static String SXJYTHONMAVEN;
+  private static String SXJYTHONLOCAL;
 
-  static String sxJythonMaven;
-  static String sxJython;
+  private static String SXJRUBYMAVEN;
+  private static String SXJRUBYLOCAL;
 
-  static String sxJRubyMaven;
-  static String sxJRuby;
+  private static Map<String, String> SXTESSDATAS = new HashMap<String, String>();
 
-  static Map<String, String> tessData = new HashMap<String, String>();
+  private static String SXMAVEN = "https://repo1.maven.org/maven2/";
+  private static String SXOSSRH = "https://oss.sonatype.org/content/groups/public/";
 
-  static String dlMavenRelease = "https://repo1.maven.org/maven2/";
-  static String dlMavenSnapshot = "https://oss.sonatype.org/content/groups/public/";
-
-  private static boolean runningJar = true;
-
-  static String whereIs(Class clazz) {
+  private static String whereIs(Class clazz) {
     CodeSource codeSrc = clazz.getProtectionDomain().getCodeSource();
     String base = null;
     if (codeSrc != null && codeSrc.getLocation() != null) {
       base = Content.slashify(codeSrc.getLocation().getPath(), false);
     }
     return base;
-  }
-
-  static void sxRunningAs() {
-    appType = "from a jar";
-    String base = whereIs(sxGlobalClassReference);
-    if (base != null) {
-      fSxBaseJar = new File(base);
-      String jn = fSxBaseJar.getName();
-      fSxBase = fSxBaseJar.getParentFile();
-      debug("sxRunningAs: runs as %s in: %s", jn, fSxBase.getAbsolutePath());
-      if (jn.contains("classes")) {
-        runningJar = false;
-        fSxProject = fSxBase.getParentFile().getParentFile();
-        debug("sxRunningAs: not jar - supposing Maven project: %s", fSxProject);
-        appType = "in Maven project from classes";
-        runningInProject = true;
-      } else if ("target".equals(fSxBase.getName())) {
-        fSxProject = fSxBase.getParentFile().getParentFile();
-        debug("sxRunningAs: folder target detected - supposing Maven project: %s", fSxProject);
-        appType = "in Maven project from some jar";
-        runningInProject = true;
-      } else {
-        if (isWindows()) {
-          if (jn.endsWith(".exe")) {
-            setSXRUNNINGASAPP(true);
-            runningJar = false;
-            appType = "as application .exe";
-          }
-        } else if (isMac()) {
-          if (fSxBase.getAbsolutePath().contains("SikuliX.app/Content")) {
-            setSXRUNNINGASAPP(true);
-            appType = "as application .app";
-            if (!fSxBase.getAbsolutePath().startsWith("/Applications")) {
-              appType += " (not from /Applications folder)";
-            }
-          }
-        }
-      }
-    } else {
-      terminate(1, "sxRunningAs: no valid Java context for SikuliX available "
-              + "(java.security.CodeSource.getLocation() is null)");
-    }
   }
 
   private static String BASECLASS = "";
@@ -351,7 +333,7 @@ public class SX {
   private static File fOptions = null;
   private static String fnOptions = "sxoptions.txt";
 
-  private static PropertiesConfiguration sxOptions = null;
+  private static PropertiesConfiguration SXOPTIONS = null;
 
   private static void loadOptions() {
     boolean success = true;
@@ -359,7 +341,7 @@ public class SX {
     if (!isNull(urlOptions)) {
       Configurations configs = new Configurations();
       try {
-        sxOptions = configs.properties(urlOptions);
+        SXOPTIONS = configs.properties(urlOptions);
       } catch (ConfigurationException cex) {
         success = false;
       }
@@ -388,7 +370,7 @@ public class SX {
     }
 
     if (isNull(fOptions)) {
-      for (String sFile : new String[]{getUSERWORK(), getUSERHOME(), getSXSTORE()}) {
+      for (String sFile : new String[]{getSXUSERWORK(), getSXUSERHOME(), getSXSTORE()}) {
         if (isNull(sFile)) {
           continue;
         }
@@ -411,7 +393,7 @@ public class SX {
         error("loadOptions: Options not valid: %s", cex.getMessage());
       }
       if (!isNull(extraOptions)) {
-        mergeExtraOptions(sxOptions, extraOptions);
+        mergeExtraOptions(SXOPTIONS, extraOptions);
       }
     } else {
       trace("loadOptions: no extra Options file found");
@@ -450,7 +432,7 @@ public class SX {
     }
   }
 
-//</editor-fold> at start
+//</editor-fold>
 
   //<editor-fold desc="05*** handle options at runtime">
   public static void loadOptions(String fpOptions) {
@@ -464,7 +446,7 @@ public class SX {
 
   public static boolean saveOptions() {
     try {
-      sxOptions.write(new FileWriter(Content.asFile(SX.getSXSTORE(), "sxoptions.txt")));
+      SXOPTIONS.write(new FileWriter(Content.asFile(SX.getSXSTORE(), "sxoptions.txt")));
     } catch (Exception e) {
       log.error("saveOptions: %s", e);
     }
@@ -472,7 +454,7 @@ public class SX {
   }
 
   public static boolean hasOptions() {
-    return sxOptions != null && sxOptions.size() > 0;
+    return SXOPTIONS != null && SXOPTIONS.size() > 0;
   }
 
   public static boolean isOption(String pName) {
@@ -480,10 +462,10 @@ public class SX {
   }
 
   public static boolean isOption(String pName, Boolean bDefault) {
-    if (sxOptions == null) {
+    if (SXOPTIONS == null) {
       return bDefault;
     }
-    String pVal = sxOptions.getString(pName, bDefault.toString()).toLowerCase();
+    String pVal = SXOPTIONS.getString(pName, bDefault.toString()).toLowerCase();
     if (pVal.contains("yes") || pVal.contains("true") || pVal.contains("on")) {
       return true;
     }
@@ -498,11 +480,11 @@ public class SX {
     if (!hasOptions()) {
       return "";
     }
-    return sxOptions.getString(pName, sDefault);
+    return SXOPTIONS.getString(pName, sDefault);
   }
 
   public static void setOption(String pName, String sValue) {
-    sxOptions.setProperty(pName, sValue);
+    SXOPTIONS.setProperty(pName, sValue);
   }
 
   public static double getOptionNumber(String pName) {
@@ -510,14 +492,14 @@ public class SX {
   }
 
   public static double getOptionNumber(String pName, double nDefault) {
-    double nVal = sxOptions.getDouble(pName, nDefault);
+    double nVal = SXOPTIONS.getDouble(pName, nDefault);
     return nVal;
   }
 
   public static Map<String, String> getOptions() {
     Map<String, String> mapOptions = new HashMap<String, String>();
     if (hasOptions()) {
-      Iterator<String> allKeys = sxOptions.getKeys();
+      Iterator<String> allKeys = SXOPTIONS.getKeys();
       while (allKeys.hasNext()) {
         String key = allKeys.next();
         mapOptions.put(key, getOption(key));
@@ -538,6 +520,7 @@ public class SX {
   //</editor-fold>
 
   //<editor-fold desc="06*** system/java version info">
+
   /**
    * @return path seperator : or ;
    */
@@ -792,7 +775,7 @@ public class SX {
    *
    * @return the system specific User's home folder
    */
-  public static String getUSERHOME() {
+  public static String getSXUSERHOME() {
     if (isNotSet(USERHOME)) {
       String aFolder = System.getProperty("user.home");
       if (aFolder == null || aFolder.isEmpty() || !Content.asFile(aFolder).exists()) {
@@ -810,7 +793,7 @@ public class SX {
    *
    * @return the working folder from JavaSystemProperty::user.dir
    */
-  public static String getUSERWORK() {
+  public static String getSXUSERWORK() {
     if (isNotSet(USERWORK)) {
       String aFolder = System.getProperty("user.dir");
       if (aFolder == null || aFolder.isEmpty() || !new File(aFolder).exists()) {
@@ -840,9 +823,9 @@ public class SX {
         }
         fSysAppPath = Content.asFile(sDir);
       } else if (isMac()) {
-        fSysAppPath = Content.asFile(getUSERHOME(), "Library/Application Support");
+        fSysAppPath = Content.asFile(getSXUSERHOME(), "Library/Application Support");
       } else if (isLinux()) {
-        fSysAppPath = Content.asFile(getUSERHOME());
+        fSysAppPath = Content.asFile(getSXUSERHOME());
         SXAPPdefault = ".Sikulix/SX2";
       }
       SYSAPPDATA = fSysAppPath.getAbsolutePath();
@@ -1130,20 +1113,20 @@ public class SX {
    *
    * @return Sikulix version
    */
-  public static String getVERSION() {
+  public static String getSXVERSION() {
     if (isNotSet(VERSION)) {
       String sxVersion = "?sxVersion?";
       String sxBuild = "?sxBuild?";
       String sxVersionShow = "?sxVersionShow?";
       String sxStamp = "?sxStamp?";
-      sxVersion = sxOptions.getString("sxversion");
-      sxBuild = sxOptions.getString("sxbuild");
+      sxVersion = SXOPTIONS.getString("sxversion");
+      sxBuild = SXOPTIONS.getString("sxbuild");
       sxBuild = sxBuild.replaceAll("\\-", "");
       sxBuild = sxBuild.replaceAll("_", "");
       sxBuild = sxBuild.replaceAll("\\:", "");
-      String sxlocalrepo = Content.slashify(sxOptions.getString("sxlocalrepo"), true);
-      String sxJythonVersion = sxOptions.getString("sxjython");
-      String sxJRubyVersion = sxOptions.getString("sxjruby");
+      String sxlocalrepo = Content.slashify(SXOPTIONS.getString("sxlocalrepo"), true);
+      String sxJythonVersion = SXOPTIONS.getString("sxjython");
+      String sxJRubyVersion = SXOPTIONS.getString("sxjruby");
 
       debug("getVERSION: version: %s build: %s", sxVersion, sxBuild);
       sxStamp = String.format("%s_%s", sxVersion, sxBuild);
@@ -1154,13 +1137,13 @@ public class SX {
       // used for download of development versions (nightly builds)
       String dlDevLink = "http://nightly.sikuli.de/";
 
-      sxJythonMaven = "org/python/jython-standalone/"
+      SXJYTHONMAVEN = "org/python/jython-standalone/"
               + sxJythonVersion + "/jython-standalone-" + sxJythonVersion + ".jar";
-      sxJython = sxlocalrepo + sxJythonMaven;
-      sxJRubyMaven = "org/jruby/jruby-complete/"
+      SXJYTHONLOCAL = sxlocalrepo + SXJYTHONMAVEN;
+      SXJRUBYMAVEN = "org/jruby/jruby-complete/"
               + sxJRubyVersion + "/jruby-complete-" + sxJRubyVersion + ".jar";
-      sxJRuby = sxlocalrepo + sxJRubyMaven;
-      tessData.put("eng", "http://download.sikulix.com/tesseract-ocr-3.02.eng.tar.gz");
+      SXJRUBYLOCAL = sxlocalrepo + SXJRUBYMAVEN;
+      SXTESSDATAS.put("eng", "http://download.sikulix.com/tesseract-ocr-3.02.eng.tar.gz");
 
       sxLibsCheckName = String.format(sxLibsCheckStamp, sxStamp);
       VERSION = sxVersion;
@@ -1180,7 +1163,7 @@ public class SX {
    */
   public static String getSXBUILD() {
     if (isNotSet(BUILD)) {
-      getVERSION();
+      getSXVERSION();
     }
     return BUILD;
   }
@@ -1192,9 +1175,9 @@ public class SX {
    *
    * @return Version (Build)
    */
-  public static String getVERSIONSHOW() {
+  public static String getSXVERSIONSHOW() {
     if (isNotSet(VERSIONSHOW)) {
-      getVERSION();
+      getSXVERSION();
     }
     return VERSIONSHOW;
   }
@@ -1208,7 +1191,7 @@ public class SX {
    */
   public static String getSXSTAMP() {
     if (isNotSet(STAMP)) {
-      getVERSION();
+      getSXVERSION();
     }
     return STAMP;
   }
@@ -1216,11 +1199,11 @@ public class SX {
   static String STAMP = "";
 
   public static boolean isSnapshot() {
-    return getVERSION().endsWith("-SNAPSHOT");
+    return getSXVERSION().endsWith("-SNAPSHOT");
   }
   //</editor-fold>
 
-  //<editor-fold desc="11*** monitor / local defice">
+  //<editor-fold desc="11*** monitor / local device">
 
   /**
    * checks, whether Java runs with a valid GraphicsEnvironment (usually means real screens connected)
@@ -1231,7 +1214,7 @@ public class SX {
     return GraphicsEnvironment.isHeadless();
   }
 
-  public static boolean onTravisCI() {
+  public static boolean isTravisCI() {
     return SX.isSet(System.getenv("TRAVIS"), "true");
   }
 
@@ -1540,16 +1523,16 @@ public class SX {
     if (hasOptions()) {
       dumpOptions();
     }
-    p("***** show environment (%s)", getVERSIONSHOW());
-    p("user.home: %s", getUSERHOME());
-    p("user.dir (work dir): %s", getUSERWORK());
+    p("***** show environment (%s)", getSXVERSIONSHOW());
+    p("user.home: %s", getSXUSERHOME());
+    p("user.dir (work dir): %s", getSXUSERWORK());
     p("java.io.tmpdir: %s", getSXSYSTEMP());
     p("running on %s", getSXSYSTEM());
     p(getSXJAVAVERSION());
     p("app data folder: %s", getSXAPP());
     p("libs folder: %s", getSXNATIVE());
-    if (runningJar) {
-      p("executing jar: %s", fSxBaseJar);
+    if (isSet(SXBASEJAR)) {
+      p("executing jar: %s", SXBASEJAR);
     }
     Content.dumpClassPath("sikulix");
     //TODO ScriptingHelper
@@ -1596,21 +1579,6 @@ public class SX {
       } else {
         return val.equals(var);
       }
-    }
-    return false;
-  }
-
-  public static boolean isRectangleEqual(Object base, Rectangle rect) {
-    Rectangle rBase = null;
-    if (base instanceof Element) {
-      rBase = ((Element) base).getRectangle();
-    } else if (base instanceof Region) {
-      rBase = ((Region) base).getRect();
-    } else if (base instanceof Rectangle) {
-      rBase = (Rectangle) base;
-    }
-    if (SX.isNotNull(rBase)) {
-      return rBase.x == rect.x && rBase.y == rect.y && rBase.width == rect.width && rBase.height == rect.height;
     }
     return false;
   }

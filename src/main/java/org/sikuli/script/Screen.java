@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Screen extends Region implements IScreen {
-  private static SXLog log = SX.getLogger("API.SCREEN");
+  private static SXLog log = SX.getSXLog("API.SCREEN");
 
   private static eType eClazz = eType.SCREEN;
   public eType getType() {

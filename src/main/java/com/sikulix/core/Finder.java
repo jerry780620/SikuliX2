@@ -19,7 +19,7 @@ import java.util.List;
 public class Finder {
 
   //<editor-fold desc="housekeeping">
-  private static final SXLog log = SX.getLogger("SX.Finder");
+  private static final SXLog log = SX.getSXLog("SX.Finder");
 
   private Element base = null;
   private Mat mBase = Element.getNewMat();
@@ -227,7 +227,7 @@ public class Finder {
 
   private static class FindResult implements Iterator<Element> {
 
-    private static final SXLog log = SX.getLogger("SX.FindResult");
+    private static final SXLog log = SX.getSXLog("SX.FindResult");
 
     private FindResult() {
     }

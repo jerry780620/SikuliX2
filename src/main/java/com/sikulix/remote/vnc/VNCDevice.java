@@ -19,7 +19,7 @@ public class VNCDevice implements IDevice, Closeable {
   static SXLog log;
 
   static {
-    log = SX.getLogger("SX.VNCDEVICE");
+    log = SX.getSXLog("SX.VNCDEVICE");
     log.isSX();
     log.on(SXLog.TRACE);
   }
