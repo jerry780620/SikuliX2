@@ -1500,11 +1500,6 @@ public class Content {
     return false;
   }
 
-  public static String getName(String filename) {
-    File f = new File(filename);
-    return f.getName();
-  }
-
   public static String slashify(String path, Boolean isDirectory) {
     if (path != null) {
       if (path.contains("%")) {
@@ -1650,7 +1645,7 @@ public class Content {
    */
   public static List<String> extractResourcesToFolder(String fpRessources, File fFolder, FilenameFilter filter) {
     List<String> content = null;
-    content = resourceList(fpRessources, filter);
+    content = makeResourceList(fpRessources, filter);
     if (content == null) {
       return null;
     }
@@ -1660,7 +1655,7 @@ public class Content {
     return doExtractToFolderWithList(fpRessources, fFolder, content);
   }
 
-  public static List<String> doExtractToFolderWithList(String fpRessources, File fFolder, List<String> content) {
+  private static List<String> doExtractToFolderWithList(String fpRessources, File fFolder, List<String> content) {
     int count = 0;
     int ecount = 0;
     String subFolder = "";
@@ -1760,7 +1755,7 @@ public class Content {
    * @param encoding
    * @return file content
    */
-  public static String extractResourceToString(String inPrefix, String inFile, String encoding) {
+  private static String extractResourceToString(String inPrefix, String inFile, String encoding) {
     InputStream aIS = null;
     String out = null;
     String content = inPrefix + "/" + inFile;
@@ -1792,7 +1787,7 @@ public class Content {
     return out;
   }
 
-  public static URL resourceLocation(String folderOrFile) {
+  private static URL evalResourceLocation(String folderOrFile) {
     log.debug("resourceLocation: (%s) %s", SX.sxGlobalClassReference, folderOrFile);
     if (!folderOrFile.startsWith("/")) {
       folderOrFile = "/" + folderOrFile;
@@ -1800,13 +1795,13 @@ public class Content {
     return SX.sxGlobalClassReference.getResource(folderOrFile);
   }
 
-  public static List<String> resourceList(String folder, FilenameFilter filter) {
+  private static List<String> makeResourceList(String folder, FilenameFilter filter) {
     log.debug("resourceList: enter");
     List<String> files = new ArrayList<String>();
     if (!folder.startsWith("/")) {
       folder = "/" + folder;
     }
-    URL uFolder = resourceLocation(folder);
+    URL uFolder = evalResourceLocation(folder);
     if (uFolder == null) {
       log.debug("resourceList: not found: %s", folder);
       return files;
@@ -1849,7 +1844,7 @@ public class Content {
     return doResourceListJar(uFolder, fpFolder, files, filter);
   }
 
-  public static List<String> doResourceListFolder(File fFolder, List<String> files, FilenameFilter filter) {
+  private static List<String> doResourceListFolder(File fFolder, List<String> files, FilenameFilter filter) {
     int localLevel = lvl + 1;
     String subFolder = "";
     if (fFolder.isDirectory()) {
@@ -1882,7 +1877,7 @@ public class Content {
     return files;
   }
 
-  public static List<String> doResourceListWithList(String folder, List<String> files, FilenameFilter filter) {
+  private static List<String> doResourceListWithList(String folder, List<String> files, FilenameFilter filter) {
     String content = extractResourceToString(folder, fpContent, "");
     String[] contentList = content.split(content.indexOf("\r") != -1 ? "\r\n" : "\n");
     if (filter == null) {
@@ -1897,7 +1892,7 @@ public class Content {
     return files;
   }
 
-  public static List<String> doResourceListJar(URL uJar, String fpResource, List<String> files, FilenameFilter filter) {
+  private static List<String> doResourceListJar(URL uJar, String fpResource, List<String> files, FilenameFilter filter) {
     int localLevel = lvl + 1;
     ZipInputStream zJar;
     String fpJar = uJar.getPath().split("!")[0];
@@ -2053,9 +2048,9 @@ public class Content {
    * @return success
    */
   public static String[] resourceListAsSXContent(String folder, File targetFolder, FilenameFilter filter) {
-    List<String> contentList = resourceList(folder, filter);
+    List<String> contentList = makeResourceList(folder, filter);
     if (contentList == null) {
-      log.error("resourceListAsSikulixContent: did not work: %s", folder);
+      log.error("resourceListAsSXContent: did not work: %s", folder);
       return null;
     }
     File target = null;
@@ -2098,7 +2093,7 @@ public class Content {
   public static String[] resourceListAsSXContentFromJar(String aJar, String folder, File targetFolder, FilenameFilter filter) {
     List<String> contentList = extractResourcesToFolderFromJar(aJar, folder, null, filter);
     if (contentList == null || contentList.size() == 0) {
-      log.error("resourceListAsSikulixContentFromJar: did not work: %s", folder);
+      log.error("resourceListAsSXContentFromJar: did not work: %s", folder);
       return null;
     }
     File target = null;
@@ -2149,7 +2144,7 @@ public class Content {
    * @return the resulting string
    */
   public static String resourceListAsString(String folder, FilenameFilter filter, String separator) {
-    List<String> aList = resourceList(folder, filter);
+    List<String> aList = makeResourceList(folder, filter);
     if (aList == null) {
       return null;
     }

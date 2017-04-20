@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -1090,7 +1091,9 @@ public class TestAll {
     if (!SX.isTravisCI() && log.isGlobalLevel(log.TRACE)) {
       if (!SX.isHeadless()) {
 // start
-        SX.listPublicMethods(Content.class, false);
+        //SX.listPublicMethods(Content.class, false);
+        URL testJar = Content.makeURL("TestJar");
+        log.p("", testJar);
 //end
       } else {
         result = "headless: not testing";
