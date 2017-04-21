@@ -1506,6 +1506,8 @@ public class SX {
           prefix = "isSet";
         } else if (name.startsWith("is")) {
           prefix = "is";
+        } else if (name.startsWith("isValid")) {
+          prefix = "isValid";
         } else if (name.startsWith("has")) {
           prefix = "has";
         } else if (name.startsWith("as")) {
@@ -1524,6 +1526,8 @@ public class SX {
           prefix = "exists";
         } else if (name.startsWith("equals")) {
           prefix = "equals";
+        } else if (name.startsWith("list")) {
+          prefix = "list";
         }
         name = name.substring(prefix.length());
         publicMethods.put(String.format("%s%s-%d%s", name, SX.isSet(prefix) ? "-" + prefix : "",
@@ -1595,7 +1599,7 @@ public class SX {
     if (isSet(SXBASEJAR)) {
       p("executing jar: %s", SXBASEJAR);
     }
-    Content.dumpClassPath("sikulix");
+    Content.dumpClasspath("sikulix");
     //TODO ScriptingHelper
 //    if (isJythonReady) {
 //      JythonHelper.get().showSysPath();

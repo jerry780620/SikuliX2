@@ -1286,7 +1286,7 @@ public class Element implements Comparable<Element> {
     if (SX.isNotNull(url) && hasContent()) {
       if ("file".equals(url.getProtocol())) {
         log.trace("save: %s", url);
-        String imgFileName = Content.asValidImageFilename(url.getPath());
+        String imgFileName = Content.asImageFilename(url.getPath());
         Mat imgContent = getContent();
         if (Imgcodecs.imwrite(imgFileName, imgContent)) {
           urlImg = url;

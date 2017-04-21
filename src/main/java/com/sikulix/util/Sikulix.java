@@ -4,16 +4,15 @@
 
 package com.sikulix.util;
 
-import com.sikulix.api.Do;
-import com.sikulix.api.Element;
-import com.sikulix.api.Picture;
-import com.sikulix.core.NativeHook;
+import com.sikulix.core.Content;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Sikulix {
 
@@ -36,64 +35,28 @@ public class Sikulix {
   //</editor-fold>
 
   public static void main(String[] args) {
-    log = SX.getSXLog("SX.Sikulix");
+    log = SX.getSXLog("SX_Sikulix");
     options.addAll(Arrays.asList(args));
     if (options.isEmpty()) {
       log.p("SikuliX2::util.Sikulix::main: no args - nothing to do :-)");
     }
     if (options.contains("trace")) {
-      System.setProperty("sikulix.logging", "trace");
+      options.remove("trace");
+      log.globalOn(SXLog.TRACE);
     }
-    log.trace("main: start: %s", "parameter");
-
-    //<editor-fold desc="tests">
-    if (options.contains("test")) {
-
-      traceBlock("testing: native libraries");
-      SX.setSXBASECLASS();
-
-      traceBlock("testing: NativeHook");
-      if (!SX.isHeadless()) {
-        NativeHook hook = NativeHook.start();
-        SX.pause(1);
-        hook.stop();
-        SX.pause(1);
-        log.trace("NativeHook works");
-      } else {
-        log.trace("headless: NativeHook not tested");
-      }
-
-      traceBlock("testing: bundlePath in jar");
-      Do.setBundlePath("./Images");
-      log.trace("bundlePath: %s", Do.getBundlePath());
-
-      traceBlock("testing: load image from jar");
-      Picture img = new Picture("sikulix2");
-      boolean imgOK = img.hasContent();
-      img.show(3);
-
-      traceBlock("testing: find image in other image");
-      Picture base = new Picture("shot-tile");
-      boolean baseOK = base.hasContent();
-      if (baseOK && imgOK) {
-        Element element = new Element();
-        element = Do.find(img, base);
-        if (element.isMatch()) {
-          base.showMatch();
-        }
-      }
-
-      traceBlock("testing: find image on primary monitor");
-      if (baseOK && imgOK) {
-        Element element = new Element();
-        base.show();
-        element = Do.find(img);
-        if (element.isMatch()) {
-          Do.onMain().showMatch();
-        }
-      }
+    String sargs = "";
+    for (String option : options) {
+      sargs += " " + option;
     }
-    //</editor-fold>
+    log.trace("main: start: %s", sargs);
+
+    if (options.get(0).contains("methods")) {
+      Map<String, String> methods = SX.listPublicMethods(Content.class);
+      for (String method : methods.keySet().stream().sorted().collect(Collectors.toList())) {
+        log.p("%-40s %s", method, methods.get(method));
+      }
+      return;
+    }
 
     if (options.contains("tool")) {
       new Tool();

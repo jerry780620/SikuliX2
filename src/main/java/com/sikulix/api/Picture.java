@@ -289,7 +289,7 @@ public class Picture extends Element {
 
   private static boolean bundlePathIsFile = true;
 
-  private static void initPath() {
+  private static void initPath(Object... args) {
     if (imagePath.isEmpty()) {
       imagePath.add(Content.asFileURL(SX.getSXIMAGES()));
       bundlePathIsFile = true;
@@ -301,7 +301,7 @@ public class Picture extends Element {
   }
 
   public static boolean setBundlePath(Object... args) {
-    initPath();
+    initPath(args);
     if (args.length == 0) {
       imagePath.set(0, Content.asFileURL(SX.getSXIMAGES()));
       bundlePathIsFile = true;
@@ -505,7 +505,7 @@ public class Picture extends Element {
 //        log.error("getValidName: image file ending %s not supported: %s", ending, name);
 //      }
 //    }
-    return Content.asValidImageFilename(name);
+    return Content.asImageFilename(name);
   }
 
   public static boolean handleImageMissing(String type, Finder.PossibleMatch possibleMatch) {

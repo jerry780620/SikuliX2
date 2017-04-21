@@ -5,26 +5,24 @@
 package com.sikulix.test;
 
 import com.sikulix.api.*;
+import com.sikulix.api.Event;
 import com.sikulix.core.*;
 import com.sikulix.remote.vnc.VNCDevice;
 import com.sikulix.run.Runner;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
-import org.opencv.core.*;
+import org.opencv.core.Mat;
 import org.sikuli.script.Location;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestAll {
 
@@ -1092,8 +1090,7 @@ public class TestAll {
       if (!SX.isHeadless()) {
 // start
         //SX.listPublicMethods(Content.class, false);
-        URL testJar = Content.makeURL("TestJar");
-        log.p("", testJar);
+        log.p("%s", Content.asImageFilename("test.xxx"));
 //end
       } else {
         result = "headless: not testing";

@@ -280,8 +280,11 @@ public class SXLog {
     if (msg.startsWith("!")) {
       return msg.substring(1);
     }
-    String orgMsg = msg;
     String clazz = logger.getName().replaceAll("\\.", "");
+    if (clazz.startsWith("SX_")) {
+      return msg;
+    }
+    String orgMsg = msg;
     Properties currentProps = null;
     if (!translateProps.containsKey(clazz)) {
       currentProps = null;
