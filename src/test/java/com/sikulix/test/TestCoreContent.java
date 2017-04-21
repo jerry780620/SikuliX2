@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Ignore
+//@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestCoreContent {
 
@@ -45,67 +45,51 @@ public class TestCoreContent {
   private String currentTest;
   private String result;
 
-  private void methodEntry() {
-    currentTest = Thread.currentThread().getStackTrace()[2].getMethodName();
-  }
-
-  private String testError(String msg, Object... args) {
-    return String.format(msg, args);
-  }
-  
-  private Map<String, String> makeTestCasesWithExpected(String... cases) {
-    Map<String, String> testCases = new HashMap<>();
-    for (int n = 0; n < cases.length; n += 2) {
-      testCases.put(cases[n], cases[n+1]);
-    }
-    return testCases;
-  }
-
-  private List<String> makeTestCases(String... cases) {
-    List<String> testCases = new ArrayList<>();
-    for (int n = 0; n < cases.length; n++) {
-      testCases.add(cases[n]);
-    }
-    return testCases;
-  }
-
   @Ignore
   public void test_000_template() {
-    methodEntry();
+    currentTest = TestHelper.methodEntry();
+    if (TestHelper.shouldNotRun(currentTest)) {
+      return;
+    }
     result = "test template";
   }
 
   @Test
   public void test_010_asImageFilename() {
-    methodEntry();
-    Map<String, String> testCases = makeTestCasesWithExpected("test", "test.png", ".test", ".test.png",
+    currentTest = TestHelper.methodEntry();
+    if (TestHelper.shouldNotRun(currentTest)) {
+      return;
+    }
+    Map<String, String> testCases = TestHelper.makeTestCasesWithExpected("test", "test.png", ".test", ".test.png",
               "test.jpg", "test.jpg", ".test.jpg", ".test.jpg", ".test.jpg", ".test.jpg", "test.xxx", "test.xxx",
               ".test.xxx", ".test.xxx", ".test.xxx", ".test.xxx");
     for (String given : testCases.keySet()) {
       String fName = Content.asImageFilename(given);
       String expected = testCases.get(given);
-      assert fName.equals(expected) : testError("given(%s) result(%s) expected(%s)", given, fName, expected);
+      assert fName.equals(expected) : TestHelper.testError("given(%s) result(%s) expected(%s)", given, fName, expected);
       result += String.format("[%s, %s] ", given, fName);
     }
   }
 
   @Test
   public void test_050_onClassPath() {
-    methodEntry();
-    List<String> testCases = makeTestCases("testjar", "target", "test-");
+    currentTest = TestHelper.methodEntry();
+    if (TestHelper.shouldNotRun(currentTest)) {
+      return;
+    }
+    List<String> testCases = TestHelper.makeTestCases("testjar", "target", "test-");
     for (String given : testCases) {
       URL expectedURL = Content.onClasspath(given);
       if (SX.isNull(expectedURL)) {
         Content.dumpClasspath();
       }
-      assert SX.isNotNull(expectedURL) : testError("not found: %s", given);
+      assert SX.isNotNull(expectedURL) : TestHelper.testError("not found: %s", given);
       assert expectedURL.getProtocol().equals("file") : "url protocol not file";
       result += String.format("[found: %s] ", given);
       assert Content.isOnClasspath(expectedURL);
       String path = expectedURL.getPath();
       String name = new File(expectedURL.getPath()).getName();
       result += String.format("[on classpath as: %s] ", path.endsWith("jar") ? name : path);
-      Content.dumpClasspath();
     }
   }
 }

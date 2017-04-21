@@ -46,31 +46,12 @@ public class TestTemplate {
     result = "";
   }
 
-  private String testError(String msg, Object... args) {
-    return String.format(msg, args);
-  }
-
-  private Map<String, String> makeTestCasesWithExpected(String... cases) {
-    Map<String, String> testCases = new HashMap<>();
-    for (int n = 0; n < cases.length; n += 2) {
-      testCases.put(cases[n], cases[n+1]);
-    }
-    return testCases;
-  }
-
-  private List<String> makeTestCases(String... cases) {
-    List<String> testCases = new ArrayList<>();
-    for (int n = 0; n < cases.length; n++) {
-      testCases.add(cases[n]);
-    }
-    return testCases;
-  }
-
-  @Test
+  @Ignore
   public void test_000_template() {
-    methodEntry();
+    currentTest = TestHelper.methodEntry();
+    if (TestHelper.shouldNotRun(currentTest)) {
+      return;
+    }
     result = "test template";
   }
-
-
 }
