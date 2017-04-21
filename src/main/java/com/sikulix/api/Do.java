@@ -421,7 +421,7 @@ public class Do {
    */
 /*
   public static String load(String fpJar, String fpJarImagePath) {
-    JythonHelper jython = JythonHelper.get();
+    JythonHelper jython = JythonHelper.getAll();
     String fpJarFound = null;
     if (jython != null) {
       File aFile = jython.existsSysPathJar(fpJar);
@@ -447,7 +447,7 @@ public class Do {
    * and stored in the target folder (thus securing your code against changes).<br>
    * A folder structure is preserved. All files not ending as .py will be copied also.
    * The target folder might then be packed to a jar using buildJarFromFolder.<br>
-   * Be aware: you will get no feedback about any compile problems,
+   * Be aware: you will getAll no feedback about any compile problems,
    * so make sure your code compiles error free. Currently there is no support for running such a jar,
    * it can only be used with load()/import, but you might provide a simple script that does load()/import
    * and then runs something based on available functions in the jar code.
@@ -459,7 +459,7 @@ public class Do {
 
 /*
   public static boolean compileJythonFolder(String fpSource, String fpTarget) {
-    JythonHelper jython = JythonHelper.get();
+    JythonHelper jython = JythonHelper.getAll();
     if (jython != null) {
       File fTarget = new File(fpTarget);
       Content.deleteFileOrFolder(fTarget);
@@ -554,28 +554,28 @@ public class Do {
 
   //<editor-fold desc="SX Do ImagePath handling">
   public static boolean setBundlePath(Object... args) {
-    return Picture.setBundlePath(args);
+    return Content.setBundlePath(args);
   }
 
   public static String getBundlePath() {
-    return Picture.getBundlePath();
+    return Content.getBundlePath();
   }
 
   public static void addImagePath(Object... args) {
-    Picture.addPath(args);
+    Content.getImagePath().add(args);
   }
 
   public static void removeImagePath(Object... args) {
-    Picture.removePath(args);
+    Content.getImagePath().remove(Content.getImagePath().get(args));
   }
 
   public static String[] getImagePath() {
-    return Picture.getPath();
+    return Content.getImagePath().getAll();
   }
 
   public static String resetImagePath(Object... args) {
-    Picture.resetPath(args);
-    return Picture.getBundlePath();
+    Content.resetPath(args);
+    return Content.getBundlePath();
   }
   //</editor-fold>
 
@@ -750,7 +750,7 @@ public class Do {
   //<editor-fold desc="SX Do Keys">
 
   /**
-   * get the lock state of the given key
+   * getAll the lock state of the given key
    *
    * @param key respective key specifier according class Key
    * @return true/false

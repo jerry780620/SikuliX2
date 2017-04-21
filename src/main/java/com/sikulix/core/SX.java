@@ -171,10 +171,10 @@ public class SX {
 
       trace("!sxinit: entry");
 
-      // *** get SX options
+      // *** getAll SX options
       loadOptions();
 
-      // *** get the version info
+      // *** getAll the version info
       getSXVERSION();
 
       // *** check how we are running
@@ -332,7 +332,7 @@ public class SX {
   }
   //</editor-fold>
 
-  //<editor-fold desc="04*** get SX options at startup">
+  //<editor-fold desc="04*** getAll SX options at startup">
   private static File fOptions = null;
   private static String fnOptions = "sxoptions.txt";
 
@@ -799,7 +799,7 @@ public class SX {
   public static String getSXUSERWORK() {
     if (isNotSet(USERWORK)) {
       String aFolder = System.getProperty("user.dir");
-      if (aFolder == null || aFolder.isEmpty() || !new File(aFolder).exists()) {
+      if (!Content.existsFile(aFolder)) {
         terminate(-1, "getUSERWORK: JavaSystemProperty::user.dir not valid");
       }
       USERWORK = Content.asFolder(aFolder).getAbsolutePath();
@@ -821,7 +821,7 @@ public class SX {
       File fSysAppPath = null;
       if (isWindows()) {
         String sDir = System.getenv("APPDATA");
-        if (sDir == null || sDir.isEmpty()) {
+        if (isNotSet(sDir)) {
           terminate(1, "setSYSAPP: Windows: %s not valid", "%APPDATA%");
         }
         fSysAppPath = Content.asFile(sDir);
@@ -1306,14 +1306,14 @@ public class SX {
     try {
       usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
     } catch (NoSuchFieldException ex) {
-      error("checkJavaUsrPath: get (%s)", ex);
+      error("checkJavaUsrPath: getAll (%s)", ex);
     } catch (SecurityException ex) {
-      error("checkJavaUsrPath: get (%s)", ex);
+      error("checkJavaUsrPath: getAll (%s)", ex);
     }
     if (usrPathsField != null) {
       usrPathsField.setAccessible(true);
       try {
-        //get array of paths
+        //getAll array of paths
         String[] javapaths = (String[]) usrPathsField.get(null);
         //check if the path to add is already present
         for (String p : javapaths) {
@@ -1498,8 +1498,8 @@ public class SX {
         }
         String name = method.getName();
         String prefix = "";
-        if (name.startsWith("get")) {
-          prefix = "get";
+        if (name.startsWith("getAll")) {
+          prefix = "getAll";
         } else if (name.startsWith("set")) {
           prefix = "set";
         } else if (name.startsWith("isSet")) {
@@ -1602,7 +1602,7 @@ public class SX {
     Content.dumpClasspath("sikulix");
     //TODO ScriptingHelper
 //    if (isJythonReady) {
-//      JythonHelper.get().showSysPath();
+//      JythonHelper.getAll().showSysPath();
 //    }
     p("***** show environment end");
   }

@@ -1021,7 +1021,7 @@ public class Key {
   }
 
   /**
-   * get the lock state of the given key
+   * getAll the lock state of the given key
    *
    * @param key as Character (scroll, caps, num)
    * @return true/false
@@ -1198,7 +1198,7 @@ public class Key {
 //						}
 //					}
 //				}
-//				if (keyLocal.get(keyNew) == null) {
+//				if (keyLocal.getAll(keyNew) == null) {
 //					keyLocal.put(keyNew, codeI);
 //				}
 //				Debug.log(3, "%s %c %c %s", mod, keyOld, keyNew, codeS);
@@ -1211,7 +1211,7 @@ public class Key {
 //		Debug.log(3, "--------------- keyLocal");
 //		Integer[] codeI;
 //		for (Character kc : keyLocal.keySet()) {
-//			codeI = keyLocal.get(kc);
+//			codeI = keyLocal.getAll(kc);
 //			Debug.log(3, "%c %s %s %s", kc.charValue(),
 //							(codeI[0] == -1 ? "" : KeyEvent.getKeyText(codeI[0])),
 //							(codeI[1] == -1 ? "" : KeyEvent.getKeyText(codeI[1])),
@@ -1236,7 +1236,7 @@ public class Key {
 //
 //    @Override
 //    public void run() {
-//      BufferedImage img = Image.create("SikuliLogo").get();
+//      BufferedImage img = Image.create("SikuliLogo").getAll();
 //      Debug.log(3, "KBSetup: %s", img);
 //      Image.dump();
 //      kbSetup = new JFrame("Localized Keyboard Setup");

@@ -56,7 +56,7 @@ public class Client {
   }
 
   public static JSONObject get(String urlCommand) {
-    log.trace("get(): %s", urlCommand);
+    log.trace("getAll(): %s", urlCommand);
     HttpResponse<JsonNode> jsonResponse = null;
     JSONObject response = null;
     try {
@@ -64,14 +64,14 @@ public class Client {
               .header("accept", "application/json")
               .asJson();
     } catch (UnirestException e) {
-      log.error("get(): %s", e.getMessage());
+      log.error("getAll(): %s", e.getMessage());
     }
     String responseBody = "null";
     if (SX.isNotNull(jsonResponse)) {
       responseBody = jsonResponse.getBody().toString();
       response = SXJson.makeObject(responseBody);
     }
-    log.trace("get() response: %s",jsonResponse.getBody().toString());
+    log.trace("getAll() response: %s",jsonResponse.getBody().toString());
     return response;
   }
 

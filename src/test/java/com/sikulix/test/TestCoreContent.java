@@ -12,12 +12,9 @@ import org.junit.runners.MethodSorters;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//@Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestCoreContent {
 
@@ -45,13 +42,43 @@ public class TestCoreContent {
   private String currentTest;
   private String result;
 
-  @Ignore
-  public void test_000_template() {
+  @Test
+  public void test_000_play() {
+    currentTest = TestHelper.methodEntryNotOnTravis();
+    if (TestHelper.shouldNotRun(currentTest)) {
+      return;
+    }
+    Content.ImagePath imagePath = Content.getImagePath();
+    imagePath.add("com.sikulix.testjar.Testjar");
+    String[] paths = imagePath.getAll();
+    for (String path: paths) {
+      log.p("%s", path);
+    }
+  }
+
+  @Test
+  public void test_001_startup_userwork() {
     currentTest = TestHelper.methodEntry();
     if (TestHelper.shouldNotRun(currentTest)) {
       return;
     }
-    result = "test template";
+    result = SX.getSXUSERWORK();
+    if (SX.isNotSet(result)) {
+      SX.show();
+      assert false : TestHelper.testError("null or not there: %s", result);
+    }
+  }
+
+  @Test
+  public void test_008_startup_native_load() {
+    currentTest = "test_011_startup_native_load";
+    File fsxnative = new File(SX.getSXNATIVE());
+    Content.deleteFileOrFolder(fsxnative);
+    assert !fsxnative.exists() : TestHelper.testError("not deleted: %s", fsxnative);
+    SX.loadNative(SX.NATIVES.OPENCV);
+    File test = new File(SX.getSXNATIVE(), SX.sxLibsCheckName);
+    assert test.exists() : TestHelper.testError("not loaded: %s", test);
+    result = SX.sxLibsCheckName;
   }
 
   @Test

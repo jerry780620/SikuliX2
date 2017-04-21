@@ -378,7 +378,7 @@ public class Keys {
     keyTexts.put("#M+", toJavaKeyCode(C_META)[0]);
     keyTexts.put("#M-", toJavaKeyCode(C_META)[0]);
     for (String k : keyTexts.keySet()) {
-      //log.trace("Key: %s is: %s", k, KeyEvent.getKeyText(keyTexts.get(k)));
+      //log.trace("Key: %s is: %s", k, KeyEvent.getKeyText(keyTexts.getAll(k)));
       if (k.length() < 4) {
         continue;
       }
@@ -1020,7 +1020,7 @@ public class Keys {
   }
 
   /**
-   * get the lock state of the given key
+   * getAll the lock state of the given key
    *
    * @param key as Character (scroll, caps, num)
    * @return true/false

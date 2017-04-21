@@ -47,7 +47,7 @@ public class SXJNA {
     );
 
     /**
-     * get the current value of a variable from real Windows environment
+     * getAll the current value of a variable from real Windows environment
      *
      * @param name of the environment variable
      * @return current content

@@ -56,7 +56,7 @@ public class Target extends Picture {
   }
   //</editor-fold>
 
-  //<editor-fold desc="***** set, get">
+  //<editor-fold desc="***** set, getAll">
   public void similar(double score) {
     setWantedScore(score);
   }

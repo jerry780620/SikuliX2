@@ -4,8 +4,8 @@
 
 package com.sikulix.core;
 
-import com.sikulix.api.Picture;
 //import org.sikuli.basics.PreferencesUser;
+
 import com.sikulix.util.SplashFrame;
 
 import javax.imageio.ImageIO;
@@ -657,6 +657,7 @@ public class Content {
     }
     return sb.toString();
   }
+
   //</editor-fold>
 
   //<editor-fold desc="025*** filter">
@@ -1005,7 +1006,7 @@ public class Content {
   }
 
   public static String saveTimedImage(BufferedImage img) {
-    return saveTimedImage(img, Picture.getBundlePath(), null);
+    return saveTimedImage(img, getBundlePath(), null);
   }
 
   public static String saveTimedImage(BufferedImage img, String path) {
@@ -1031,34 +1032,25 @@ public class Content {
     }
     Object oPath = args[0];
     Object oSub = "";
+    File fPath = new File(oPath.toString());
     if (args.length > 1) {
-      oSub = args[1];
-    }
-    File fPath = null;
-    if (SX.isNotSet(oSub)) {
-      fPath = new File(oPath.toString());
-    } else {
-      fPath = new File(oPath.toString(), oSub.toString());
+      for (int n = 1; n < args.length; n++) {
+        oSub = args[n];
+        if (SX.isSet(oSub)) {
+          fPath = new File(fPath, oSub.toString());
+        }
+      }
     }
     try {
       fPath = fPath.getCanonicalFile();
     } catch (IOException e) {
-      SX.error("makeFile: getCanonicalFile: %s %s (%s)", oPath, oSub, e.getMessage());
+      SX.error("makeFile: getCanonicalFile: %s (%s)", fPath, e.getMessage());
     }
     return fPath;
   }
 
   public static File asFile(Object... args) {
     return makeFile(args);
-  }
-
-  public static File asFileExists(Object... args) {
-    File fPath = makeFile(args);
-    if (!SX.isNull(fPath) && !fPath.exists()) {
-      SX.error("asFileExists: %s does not exist", fPath);
-      return null;
-    }
-    return fPath;
   }
 
   private static final Pattern validEndings = Pattern.compile(".*?(.png|.jpg|.jpeg|.tiff|.bmp)$");
@@ -1087,40 +1079,34 @@ public class Content {
     if (aFile.isDirectory()) {
       return aFile;
     }
-    SX.error("getFolder: %s does not exist", aFile);
+    SX.error("getFolder: not created %s", aFile);
     return null;
   }
 
-  public static File asFolderExists(Object... args) {
-    File aFile = makeFile(args);
-    if (SX.isNotSet(aFile)) {
-      return null;
+  public static String evalJarPath(String className) {
+    Class clazz = null;
+    try {
+      clazz = Class.forName(className);
+    } catch (ClassNotFoundException e) {
+      log.error("evalJarPath: not on classpath: %s", className);
     }
-    if (aFile.isDirectory()) {
-      return aFile;
+    String path = "";
+    if (SX.isNotNull(clazz)) {
+      CodeSource src = clazz.getProtectionDomain().getCodeSource();
+      if (SX.isNotNull(src.getLocation())) {
+        path = new File(src.getLocation().getPath()).getAbsolutePath();
+      }
     }
-    aFile.mkdirs();
-    if (aFile.isDirectory()) {
-      return aFile;
-    }
-    SX.error("getFolder: %s does not exist", aFile);
-    return null;
+    return path;
   }
 
-  public static String evalJarPath(Class clazz) {
-    CodeSource src = clazz.getProtectionDomain().getCodeSource();
-    if (SX.isNotNull(src.getLocation())) {
-      return new File(src.getLocation().getPath()).getAbsolutePath();
-    }
-    return "";
-  }
-
-  public static String evalJarName(Class clazz) {
-    String jarPath = evalJarPath(clazz);
+  public static String evalJarName(String className) {
+    String jarPath = evalJarPath(className);
+    String name = "";
     if (SX.isSet(jarPath)) {
-      return new File(jarPath).getName();
+      name = new File(jarPath).getName();
     }
-    return "";
+    return name;
   }
 
   public static String asPath(URL uPath) {
@@ -1437,29 +1423,37 @@ public class Content {
     return netURL;
   }
 
-  public static boolean existsFile(Object aPath) {
-    if (aPath instanceof URL) {
+  public static boolean existsFile(Object... args) {
+    if (args.length == 0 || SX.isNull(args[0])) {
+      return false;
+    }
+    Object path = args[0];
+    String name = "";
+    if (args.length > 1 && args[1] instanceof String) {
+      name = (String) args[1];
+    }
+    if (path instanceof URL) {
       //TODO implement existsFile(URL)
       return false;
     }
-    return (asFile(aPath).exists());
+    return (asFile(path, name).exists());
   }
 
-  public static boolean existsFile(Object aPath, String name) {
-    if (aPath instanceof URL) {
-      //TODO implement existsFile(URL, name)
+  public static boolean existsImageFile(Object... args) {
+    if (args.length == 0 || SX.isNull(args[0])) {
       return false;
     }
-    return (asFile(aPath, name).exists());
-  }
-
-  public static boolean existsImageFile(Object aPath, String name) {
-    if (aPath instanceof URL) {
+    Object path = args[0];
+    String name = "";
+    if (args.length > 1 && args[1] instanceof String) {
+      name = (String) args[1];
+    }
+    name = asImageFilename(name);
+    if (path instanceof URL) {
       //TODO implement existsImageFile(URL, name)
       return false;
     }
-    File imgFile = new File(asImageFilename(asFile(aPath, name).getAbsolutePath()));
-    return (imgFile.exists());
+    return (existsFile(path, name));
   }
 
   public static boolean existsJarContent(String jarPath, String jarContent) {
@@ -2550,4 +2544,201 @@ public class Content {
     return content;
   }
   //</editor-fold>
+
+  private static boolean bundlePathIsFile = true;
+
+  //<editor-fold desc="bundle path">
+  public static void clearPath() {
+    imagePathList.clear();
+  }
+
+  public static boolean setBundlePath(Object... args) {
+    initPath(args);
+    if (args.length == 0) {
+      imagePathList.set(0, asFileURL(SX.getSXIMAGES()));
+      bundlePathIsFile = true;
+      return true;
+    }
+    URL urlPath = makeURL(args);
+    if (SX.isSet(urlPath)) {
+      if ("file".equals(urlPath.getProtocol()) && urlPath.getPath().contains("test-classes")) {
+        try {
+          urlPath = new URL("file", null, 0, urlPath.getPath().replace("test-", ""));
+        } catch (MalformedURLException e) {
+          log.error("setBundlePath: hack(test-classes -> classes) did not work");
+        }
+      }
+      bundlePathIsFile = false;
+      if ("file".equals(urlPath.getProtocol())) {
+        if (!urlPath.getPath().contains(".jar!/")) {
+          bundlePathIsFile = true;
+        }
+      }
+      imagePathList.set(0, urlPath);
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean resetPath(Object... args) {
+    imagePathList.clear();
+    if (args.length == 0) {
+      initPath();
+      return true;
+    }
+    return setBundlePath(args);
+  }
+
+  public static String getBundlePath() {
+    initPath();
+    return asPath(imagePathList.get(0));
+  }
+
+  public static boolean isBundlePathFile() {
+    getBundlePath();
+    return bundlePathIsFile;
+  }
+  //</editor-fold>
+
+  public static class ImagePath extends SXPathList {
+    private ImagePath() {}
+
+    private static void initPath(Object... args) {
+      if (imagePathList.isEmpty()) {
+        imagePathList.add(asFileURL(SX.getSXIMAGES()));
+        bundlePathIsFile = true;
+      }
+    }
+  }
+
+  private static ImagePath imagePath = null;
+
+  public static ImagePath getImagePath() {
+    if (SX.isNull(imagePath)) {
+      imagePath = new ImagePath();
+    }
+    return imagePath;
+  }
+
+  private static class SXPathList {
+    private final List<URL> pathList = Collections.synchronizedList(new ArrayList<URL>());
+
+    public String[] getAll(String filter) {
+      String[] paths = new String[pathList.size()];
+      int n = 0;
+      String path;
+      for (URL url : pathList) {
+        path = asPath(url);
+        if (SX.isSet(filter) && !path.contains(filter)) {
+          continue;
+        }
+        paths[n++] = path;
+      }
+      return paths;
+    }
+
+    public String[] getAll() {
+      return getAll("");
+    }
+
+    public int add(Object... args) {
+      if (args.length == 0) {
+        return -1;
+      }
+      URL urlPath = makeURL(args);
+      if (SX.isSet(urlPath)) {
+        pathList.add(urlPath);
+        return pathList.size() - 1;
+      }
+      return -1;
+    }
+
+    public String get(int n) {
+      if (n < 0 || n > pathList.size() - 1) {
+        n = 0;
+      }
+      return asPath(pathList.get(n));
+    }
+
+    public boolean set(int n, String fpPath) {
+      if (n < 0 || n > pathList.size() - 1) {
+        return false;
+      }
+      URL urlPath = makeURL(fpPath);
+      if (SX.isSet(urlPath)) {
+        pathList.set(n, urlPath);
+        return true;
+      }
+      return false;
+    }
+
+    public String remove(int n) {
+      if (n < 0 || n > pathList.size() - 1) {
+        return "";
+      }
+      return asPath(pathList.get(n));
+    }
+
+    public int get(Object args) {
+      String given = asPath(makeURL(args));
+      if (SX.isNotSet(given)) return -1;
+      int n = 0;
+      for (String path : getAll()) {
+        if (path.contains(given)) {
+          return n;
+        }
+        n++;
+      }
+      return -1;
+    }
+  }
+
+  //<editor-fold desc="012*** script / image path">
+  /**
+   * try to find the given relative image file name on the image path<br>
+   * starting from entry 0, the first found existence is taken<br>
+   * absolute file names are checked for existence
+   *
+   * @param fname relative or absolute filename
+   * @return a valid URL or null if not found/exists
+   */
+  public static URL searchOnImagePath(String fname) {
+    fname = asImageFilename(fname);
+    URL fURL = null;
+    String proto = "";
+    fname = normalize(fname);
+    if (new File(fname).isAbsolute()) {
+      if (new File(fname).exists()) {
+        fURL = makeURL(fname);
+      }
+    } else {
+      initPath();
+      for (URL path : imagePathList) {
+        if (path == null) {
+          continue;
+        }
+        proto = path.getProtocol();
+        fURL = makeURL(path, fname);
+        if ("file".equals(proto)) {
+          if (new File(fURL.getPath()).exists()) {
+            break;
+          }
+        } else if ("jar".equals(proto) || proto.startsWith("http")) {
+          if (fURL != null) {
+            break;
+          }
+        } else {
+          log.error("searchOnImagePath: URL not supported: " + path);
+          return fURL;
+        }
+        fURL = null;
+      }
+    }
+    if (fURL == null) {
+      log.error("searchOnImagePath: does not exist: " + fname);
+    }
+    return fURL;
+  }
+  //</editor-fold>
+
 }

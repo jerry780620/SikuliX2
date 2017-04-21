@@ -100,7 +100,7 @@ public class ADBClient {
     return device;
   }
 
-  //TODO: get device by id
+  //TODO: getAll device by id
 
   public boolean isValid() {
     return jadb != null;

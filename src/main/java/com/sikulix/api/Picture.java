@@ -16,7 +16,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -150,7 +149,7 @@ public class Picture extends Element {
   }
   //</editor-fold>
 
-  //<editor-fold desc="*** get content">
+  //<editor-fold desc="*** getAll content">
   private long timeToLoad = -1;
 
   public long getTimeToLoad() {
@@ -158,7 +157,7 @@ public class Picture extends Element {
   }
 
   private void setContent(String fpImg) {
-    URL url = Picture.searchOnImagePath(fpImg);
+    URL url = Content.searchOnImagePath(fpImg);
     if (SX.isSet(url)) {
       setContent(url);
     } else {
@@ -188,9 +187,9 @@ public class Picture extends Element {
         timeToLoad = new Date().getTime() - start;
         if (isValid()) {
           setAttributes();
-          log.debug("get: loaded: (%dx%s) %s", getContent().width(), getContent().height(), urlImg);
+          log.debug("getAll: loaded: (%dx%s) %s", getContent().width(), getContent().height(), urlImg);
         } else {
-          log.error("get: not loaded: %s", urlImg);
+          log.error("getAll: not loaded: %s", urlImg);
         }
       }
     }
@@ -284,229 +283,7 @@ public class Picture extends Element {
   }
   //</editor-fold>
 
-  //<editor-fold desc="*** path">
-  private static final List<URL> imagePath = Collections.synchronizedList(new ArrayList<URL>());
-
-  private static boolean bundlePathIsFile = true;
-
-  private static void initPath(Object... args) {
-    if (imagePath.isEmpty()) {
-      imagePath.add(Content.asFileURL(SX.getSXIMAGES()));
-      bundlePathIsFile = true;
-    }
-  }
-
-  public static void clearPath() {
-    imagePath.clear();
-  }
-
-  public static boolean setBundlePath(Object... args) {
-    initPath(args);
-    if (args.length == 0) {
-      imagePath.set(0, Content.asFileURL(SX.getSXIMAGES()));
-      bundlePathIsFile = true;
-      return true;
-    }
-    URL urlPath = Content.makeURL(args);
-    if (SX.isSet(urlPath)) {
-      if ("file".equals(urlPath.getProtocol()) && urlPath.getPath().contains("test-classes")) {
-        try {
-          urlPath = new URL("file", null, 0, urlPath.getPath().replace("test-", ""));
-        } catch (MalformedURLException e) {
-          log.error("setBundlePath: hack(test-classes -> classes) did not work");
-        }
-      }
-      bundlePathIsFile = false;
-      if ("file".equals(urlPath.getProtocol())) {
-        if (!urlPath.getPath().contains(".jar!/")) {
-          bundlePathIsFile = true;
-        }
-      }
-      imagePath.set(0, urlPath);
-      return true;
-    }
-    return false;
-  }
-
-  public static boolean resetPath(Object... args) {
-    imagePath.clear();
-    if (args.length == 0) {
-      initPath();
-      return true;
-    }
-    return setBundlePath(args);
-  }
-
-  public static String getBundlePath() {
-    initPath();
-    return Content.asPath(imagePath.get(0));
-  }
-
-  public static boolean isBundlePathFile() {
-    getBundlePath();
-    return bundlePathIsFile;
-  }
-
-  public static String[] getPath(String filter) {
-    String[] sPaths = new String[imagePath.size()];
-    int n = 0;
-    String sPath;
-    for (URL uPath : imagePath) {
-      sPath = uPath.toString();
-      if (SX.isSet(filter) && !sPath.contains(filter)) {
-        continue;
-      }
-      sPaths[n++] = sPath;
-    }
-    return sPaths;
-  }
-
-  public static String[] getPath() {
-    return getPath("");
-  }
-
-  public static int hasPath(String filter) {
-    if (SX.isNotSet(filter)) return -1;
-    int n = 0;
-    String sPath;
-    for (URL uPath : imagePath) {
-      sPath = Content.asPath(uPath);
-      if (sPath.contains(filter)) {
-        return n;
-      }
-      n++;
-    }
-    return -1;
-  }
-
-  public static String getPath(int n) {
-    if (n < 0 || n > imagePath.size() - 1) {
-      n = 0;
-    }
-    return Content.asPath(imagePath.get(n));
-  }
-
-  public static boolean setPath(int n, String fpPath) {
-    if (n < 0 || n > imagePath.size() - 1) {
-      return false;
-    }
-    URL urlPath = Content.makeURL(fpPath);
-    if (SX.isSet(urlPath)) {
-      imagePath.set(n, urlPath);
-      return true;
-    }
-    return false;
-  }
-
-  public static String removePath(int n) {
-    if (n < 0 || n > imagePath.size() - 1) {
-      n = 0;
-    }
-    return Content.asPath(imagePath.get(n));
-  }
-
-  public static int addPath(Object... args) {
-    initPath();
-    if (args.length == 0) {
-      return -1;
-    }
-    URL urlPath = Content.makeURL(args);
-    if (SX.isSet(urlPath)) {
-      imagePath.add(urlPath);
-      return imagePath.size() - 1;
-    }
-    return -1;
-  }
-
-  public static int removePath(Object... args) {
-    //TODO implment removePath()
-    URL url = null;
-    return -1;
-  }
-
-  public static int insertPath(Object... args) {
-    //TODO implment insertPath()
-    URL url = null;
-    return -1;
-  }
-
-  public static int changePath(Object... args) {
-    //TODO implment changePath()
-    URL url = null;
-    return -1;
-  }
-
-  /**
-   * try to find the given relative image file name on the image path<br>
-   * starting from entry 0, the first found existence is taken<br>
-   * absolute file names are checked for existence
-   *
-   * @param fname relative or absolute filename
-   * @return a valid URL or null if not found/exists
-   */
-  public static URL searchOnImagePath(String fname) {
-    fname = getValidName(fname);
-    URL fURL = null;
-    String proto = "";
-    fname = Content.normalize(fname);
-    if (new File(fname).isAbsolute()) {
-      if (new File(fname).exists()) {
-        fURL = Content.makeURL(fname);
-      }
-    } else {
-      initPath();
-      for (URL path : imagePath) {
-        if (path == null) {
-          continue;
-        }
-        proto = path.getProtocol();
-        fURL = Content.makeURL(path, fname);
-        if ("file".equals(proto)) {
-          if (new File(fURL.getPath()).exists()) {
-            break;
-          }
-        } else if ("jar".equals(proto) || proto.startsWith("http")) {
-          if (fURL != null) {
-            break;
-          }
-        } else {
-          log.error("searchOnImagePath: URL not supported: " + path);
-          return fURL;
-        }
-        fURL = null;
-      }
-    }
-    if (fURL == null) {
-      log.error("searchOnImagePath: does not exist: " + fname);
-    }
-    return fURL;
-  }
-
-  /**
-   * image file types supported <br>
-   * Windows bitmaps - *.bmp <br>
-   * JPEG files - *.jpeg, *.jpg, *.jpe<br>
-   * Portable Network Graphics - *.png <br>
-   * TIFF files - *.tiff, *.tif (see the *Notes* section)
-   *
-   * @param name an image file name
-   * @return the name optionally .png added if no ending
-   */
-  public static String getValidName(String name) {
-//    String validEndings = ".bmp.dib.jpeg.jpg.jpe.jp2.png.pbm.pgm.ppm.sr.ras.tiff.tif";
-//    String validName = name;
-//    String[] parts = validName.split("\\.");
-//    if (parts.length == 1) {
-//      log.trace("getValidName: supposing PNG: %s", name);
-//      validName += ".png";
-//    } else {
-//      String ending = "." + parts[parts.length - 1];
-//      if (validEndings.indexOf(ending) == -1) {
-//        log.error("getValidName: image file ending %s not supported: %s", ending, name);
-//      }
-//    }
-    return Content.asImageFilename(name);
-  }
+  //</editor-fold>
 
   public static boolean handleImageMissing(String type, Finder.PossibleMatch possibleMatch) {
     if (possibleMatch.isImageMissingWhat()) {
@@ -528,12 +305,11 @@ public class Picture extends Element {
     log.trace("%s: handling not found: %s", type, possibleMatch);
     return false;
   }
-  //</editor-fold>
 
   //<editor-fold defaultstate="collapsed" desc="*** helpers">
 
   /**
-   * get a new resized Picture
+   * getAll a new resized Picture
    *
    * @param factor resize factor
    * @return a new inMemory Picture

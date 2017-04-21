@@ -474,7 +474,7 @@ public class Element implements Comparable<Element> {
   }
   //</editor-fold>
 
-  //<editor-fold desc="***** get...">
+  //<editor-fold desc="***** getAll...">
   public Element getRegion() {
     return new Element(x, y, w, h);
   }
@@ -1248,8 +1248,8 @@ public class Element implements Comparable<Element> {
   }
 
   public String save(String name) {
-    if (Picture.isBundlePathFile()) {
-      return save(name, Picture.getBundlePath());
+    if (Content.isBundlePathFile()) {
+      return save(name, Content.getBundlePath());
     }
     return save(name, SX.getSXIMAGES());
   }

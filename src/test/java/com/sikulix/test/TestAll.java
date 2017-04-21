@@ -120,7 +120,7 @@ public class TestAll {
     if (log.isGlobalLevel(SXLog.TRACE)) {
       log.stopTimer();
     }
-    Picture.clearPath();
+    Content.clearPath();
     resetDefaultScreen();
     Events.waitUntilFinished();
     Events.reset();
@@ -204,30 +204,10 @@ public class TestAll {
   }
 
   @Test
-  public void test_010_startup() {
-    currentTest = "test_010_startup_workdir";
-    String workDir = SX.getSXUSERWORK();
-    if (SX.isNotSet(workDir)) {
-      SX.show();
-    }
-    result = workDir;
-    assert SX.isSet(workDir);
-  }
-
-  @Test
-  public void test_011_startup_native_load() {
-    currentTest = "test_011_startup_native_load";
-    Element.getNewMat();
-    File test = Content.asFileExists(SX.getSXNATIVE(), SX.sxLibsCheckName);
-    result = SX.sxLibsCheckName;
-    assert !SX.isNull(test) && Content.existsFile(test);
-  }
-
-  @Test
   public void test_020_getBundlePath() {
     currentTest = "test_020_getBundlePath";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     String bundlePath = Do.getBundlePath();
     result = bundlePath;
     assert Content.existsFile(bundlePath);
@@ -236,8 +216,8 @@ public class TestAll {
   @Test
   public void test_021_setBundlePathFile() {
     currentTest = "test_021_setBundlePathFile";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     boolean success = Do.setBundlePath(mavenRoot, defaultImagePath);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -247,8 +227,8 @@ public class TestAll {
   @Test
   public void test_022_setBundlePathByClass() {
     currentTest = "test_022_setBundlePathByClass";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     boolean success = Do.setBundlePath(jarImagePathDefault);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -258,8 +238,8 @@ public class TestAll {
   @Test
   public void test_023_setBundlePathJarByClass() {
     currentTest = "test_023_setBundlePathJarByClass";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     boolean success = Do.setBundlePath(jarImagePathClass);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -269,8 +249,8 @@ public class TestAll {
   @Test
   public void test_024_setBundlePathHttp() {
     currentTest = "test_024_setBundlePathHttp";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     boolean success = Do.setBundlePath(gitRoot, "src/main/resources/" + defaultImagePath);
     result = Do.getBundlePath();
     success &= (gitImagePath).equals(result);
@@ -280,8 +260,8 @@ public class TestAll {
   @Test
   public void test_029_getImagePath() {
     currentTest = "test_029_getImagePath";
-    Picture.clearPath();
-    assert Picture.getPath().length == 0;
+    Content.clearPath();
+    assert Content.getPath().length == 0;
     Do.setBundlePath(jarImagePathDefault);
     Do.addImagePath(jarImagePathClass);
     Do.addImagePath(gitImagePath);

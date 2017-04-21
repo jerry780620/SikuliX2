@@ -38,7 +38,7 @@ public class SplashFrame extends JFrame {
     if (args.length > 0 && (args[0].contains("-testSetup") || args[0].startsWith("-i"))) {
       start = (new Date()).getTime();
       String[] splashArgs = new String[]{
-        "splash", "#", "#" + RunTime.get().SikuliVersionScript, "", "#", "#... starting - please wait ..."};
+        "splash", "#", "#" + RunTime.getAll().SikuliVersionScript, "", "#", "#... starting - please wait ..."};
       for (String e : args) {
         splashArgs[3] += e + " ";
       }
@@ -60,7 +60,7 @@ public class SplashFrame extends JFrame {
     }
     start = (new Date()).getTime();
     String[] splashArgs = new String[]{
-      "splash", "#", "#" + RunTime.get().SikuliVersionIDE, "", "#", "#... setting up environement - please wait ..."};
+      "splash", "#", "#" + RunTime.getAll().SikuliVersionIDE, "", "#", "#... setting up environement - please wait ..."};
     splash = new SplashFrame(splashArgs);
   }
 */

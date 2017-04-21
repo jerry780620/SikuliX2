@@ -1413,7 +1413,7 @@ public class Tool {
     if (evaluatingSegments) {
       if (contours.size() > 0) {
         log.trace("clicked: %s erase around", clicked);
-//        Element segment = Finder.contoursToRectangle(contours).get(0);
+//        Element segment = Finder.contoursToRectangle(contours).getAll(0);
 //        rect.x += segment.x - 1;
 //        rect.y += segment.y - 1;
 //        rect.w = segment.w + 3;
