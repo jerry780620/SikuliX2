@@ -1130,7 +1130,9 @@ public class Content {
     if (args.length < 1) {
       return null;
     }
-
+    if (args[0] instanceof URL) {
+      return (URL) args[0];
+    }
     URL url = null;
     String proto = "file:";
     String sURL = "";
@@ -2545,69 +2547,46 @@ public class Content {
   }
   //</editor-fold>
 
-  private static boolean bundlePathIsFile = true;
-
   //<editor-fold desc="bundle path">
-  public static void clearPath() {
-    imagePathList.clear();
-  }
-
   public static boolean setBundlePath(Object... args) {
-    initPath(args);
-    if (args.length == 0) {
-      imagePathList.set(0, asFileURL(SX.getSXIMAGES()));
-      bundlePathIsFile = true;
-      return true;
-    }
-    URL urlPath = makeURL(args);
-    if (SX.isSet(urlPath)) {
-      if ("file".equals(urlPath.getProtocol()) && urlPath.getPath().contains("test-classes")) {
-        try {
-          urlPath = new URL("file", null, 0, urlPath.getPath().replace("test-", ""));
-        } catch (MalformedURLException e) {
-          log.error("setBundlePath: hack(test-classes -> classes) did not work");
-        }
-      }
-      bundlePathIsFile = false;
-      if ("file".equals(urlPath.getProtocol())) {
-        if (!urlPath.getPath().contains(".jar!/")) {
-          bundlePathIsFile = true;
-        }
-      }
-      imagePathList.set(0, urlPath);
-      return true;
-    }
-    return false;
+    getImagePath().init(args);
+    return SX.isSet(getImagePath().get(0));
   }
 
-  public static boolean resetPath(Object... args) {
-    imagePathList.clear();
-    if (args.length == 0) {
-      initPath();
-      return true;
-    }
-    return setBundlePath(args);
+  public static void clearImagePath() {
+    getImagePath().clear();
+  }
+
+  public static String resetImagePath(Object... args) {
+    getImagePath().clear();
+    getImagePath().init(args);
+    return getImagePath().get(0);
   }
 
   public static String getBundlePath() {
-    initPath();
-    return asPath(imagePathList.get(0));
+    getImagePath().init();
+    return getImagePath().get(0);
   }
 
   public static boolean isBundlePathFile() {
-    getBundlePath();
-    return bundlePathIsFile;
+    return getImagePath().bundlePathIsFile();
   }
   //</editor-fold>
 
   public static class ImagePath extends SXPathList {
     private ImagePath() {}
 
-    private static void initPath(Object... args) {
-      if (imagePathList.isEmpty()) {
-        imagePathList.add(asFileURL(SX.getSXIMAGES()));
-        bundlePathIsFile = true;
+    boolean init(Object... args) {
+      if (isEmpty()) {
+        return (-1 < add(SX.getSXIMAGES()));
+      } else {
+        return set(0, makeURL(args));
       }
+    }
+
+    public boolean bundlePathIsFile() {
+      init();
+      return false;
     }
   }
 
@@ -2622,6 +2601,14 @@ public class Content {
 
   private static class SXPathList {
     private final List<URL> pathList = Collections.synchronizedList(new ArrayList<URL>());
+
+    public boolean isEmpty() {
+      return pathList.isEmpty();
+    }
+
+    public void clear() {
+      pathList.clear();
+    }
 
     public String[] getAll(String filter) {
       String[] paths = new String[pathList.size()];
@@ -2641,6 +2628,10 @@ public class Content {
       return getAll("");
     }
 
+    List<URL> all() {
+      return pathList;
+    }
+
     public int add(Object... args) {
       if (args.length == 0) {
         return -1;
@@ -2655,16 +2646,16 @@ public class Content {
 
     public String get(int n) {
       if (n < 0 || n > pathList.size() - 1) {
-        n = 0;
+        return "";
       }
       return asPath(pathList.get(n));
     }
 
-    public boolean set(int n, String fpPath) {
+    public boolean set(int n, Object path) {
       if (n < 0 || n > pathList.size() - 1) {
         return false;
       }
-      URL urlPath = makeURL(fpPath);
+      URL urlPath = makeURL(path);
       if (SX.isSet(urlPath)) {
         pathList.set(n, urlPath);
         return true;
@@ -2691,6 +2682,8 @@ public class Content {
       }
       return -1;
     }
+
+
   }
 
   //<editor-fold desc="012*** script / image path">
@@ -2712,8 +2705,8 @@ public class Content {
         fURL = makeURL(fname);
       }
     } else {
-      initPath();
-      for (URL path : imagePathList) {
+      getImagePath().init();
+      for (URL path : getImagePath().all()) {
         if (path == null) {
           continue;
         }

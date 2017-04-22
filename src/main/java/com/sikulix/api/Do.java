@@ -574,7 +574,7 @@ public class Do {
   }
 
   public static String resetImagePath(Object... args) {
-    Content.resetPath(args);
+    Content.resetImagePath(args);
     return Content.getBundlePath();
   }
   //</editor-fold>

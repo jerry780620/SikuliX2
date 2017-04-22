@@ -120,7 +120,7 @@ public class TestAll {
     if (log.isGlobalLevel(SXLog.TRACE)) {
       log.stopTimer();
     }
-    Content.clearPath();
+    Content.clearImagePath();
     resetDefaultScreen();
     Events.waitUntilFinished();
     Events.reset();
@@ -206,8 +206,7 @@ public class TestAll {
   @Test
   public void test_020_getBundlePath() {
     currentTest = "test_020_getBundlePath";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     String bundlePath = Do.getBundlePath();
     result = bundlePath;
     assert Content.existsFile(bundlePath);
@@ -216,8 +215,7 @@ public class TestAll {
   @Test
   public void test_021_setBundlePathFile() {
     currentTest = "test_021_setBundlePathFile";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     boolean success = Do.setBundlePath(mavenRoot, defaultImagePath);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -227,8 +225,7 @@ public class TestAll {
   @Test
   public void test_022_setBundlePathByClass() {
     currentTest = "test_022_setBundlePathByClass";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     boolean success = Do.setBundlePath(jarImagePathDefault);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -238,8 +235,7 @@ public class TestAll {
   @Test
   public void test_023_setBundlePathJarByClass() {
     currentTest = "test_023_setBundlePathJarByClass";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     boolean success = Do.setBundlePath(jarImagePathClass);
     result = Do.getBundlePath();
     success &= Content.existsFile(result);
@@ -249,8 +245,7 @@ public class TestAll {
   @Test
   public void test_024_setBundlePathHttp() {
     currentTest = "test_024_setBundlePathHttp";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     boolean success = Do.setBundlePath(gitRoot, "src/main/resources/" + defaultImagePath);
     result = Do.getBundlePath();
     success &= (gitImagePath).equals(result);
@@ -260,8 +255,7 @@ public class TestAll {
   @Test
   public void test_029_getImagePath() {
     currentTest = "test_029_getImagePath";
-    Content.clearPath();
-    assert Content.getPath().length == 0;
+    Content.clearImagePath();
     Do.setBundlePath(jarImagePathDefault);
     Do.addImagePath(jarImagePathClass);
     Do.addImagePath(gitImagePath);
