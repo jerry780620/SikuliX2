@@ -727,7 +727,7 @@ public class SX {
   public static String getSXSYSTEMP() {
     if (isNotSet(SYSTEMP)) {
       String tmpdir = System.getProperty("java.io.tmpdir");
-      if (tmpdir == null || tmpdir.isEmpty() || !Content.asFile(tmpdir).exists()) {
+      if (!Content.existsFile(tmpdir)) {
         terminate(1, "JavaSystemProperty::java.io.tmpdir not valid");
       }
       SYSTEMP = Content.asFile(tmpdir).getAbsolutePath();
@@ -744,15 +744,14 @@ public class SX {
    */
   public static String getSXTEMP() {
     if (isNotSet(TEMP)) {
-      File fSXTempPath = Content.asFile(getSXSYSTEMP(), String.format("Sikulix_%d", getRandomInt()));
       for (String aFile : Content.asFile(SYSTEMP).list()) {
         if ((aFile.startsWith("Sikulix") && (new File(aFile).isFile()))
                 || (aFile.startsWith("jffi") && aFile.endsWith(".tmp"))) {
           Content.deleteFileOrFolder(new File(getSXSYSTEMP(), aFile));
         }
       }
-      fSXTempPath.mkdirs();
-      if (!fSXTempPath.exists()) {
+      File fSXTempPath = Content.asFolder(getSXSYSTEMP(), String.format("Sikulix_%d", getRandomInt()));
+      if (!Content.existsFile(fSXTempPath)) {
         terminate(1, "getTEMP: could not create: %s", fSXTempPath.getAbsolutePath());
       }
       TEMP = fSXTempPath.getAbsolutePath();
@@ -781,7 +780,7 @@ public class SX {
   public static String getSXUSERHOME() {
     if (isNotSet(USERHOME)) {
       String aFolder = System.getProperty("user.home");
-      if (aFolder == null || aFolder.isEmpty() || !Content.asFile(aFolder).exists()) {
+      if (!Content.existsFile(aFolder)) {
         terminate(-1, "getUSERHOME: JavaSystemProperty::user.home not valid");
       }
       USERHOME = Content.asFile(aFolder).getAbsolutePath();
@@ -867,9 +866,8 @@ public class SX {
    */
   public static String getSXAPP() {
     if (isNotSet(SXAPPSTORE)) {
-      File fDir = Content.asFile(getSXSYSAPPDATA(), SXAPPdefault);
-      fDir.mkdirs();
-      if (!fDir.exists()) {
+      File fDir = Content.asFolder(getSXSYSAPPDATA(), SXAPPdefault);
+      if (!Content.existsFile(fDir)) {
         terminate(1, "setSXAPP: folder not available or cannot be created: %s", fDir);
       }
       SXAPPSTORE = fDir.getAbsolutePath();
@@ -887,9 +885,7 @@ public class SX {
    */
   public static String getSXDOWNLOADS() {
     if (isNotSet(SXDOWNLOADS)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFile(fBase, SXDOWNLOADSdefault);
-      setSXDOWNLOADS(fDir);
+      setSXDOWNLOADS(getSXAPP(), SXDOWNLOADSdefault);
     }
     return SXDOWNLOADS;
   }
@@ -897,12 +893,9 @@ public class SX {
   static String SXDOWNLOADS = "";
   static String SXDOWNLOADSdefault = "Downloads";
 
-  public static String setSXDOWNLOADS(Object oDir) {
-    File fDir = Content.asFile(oDir, null);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXDOWNLOADS(Object... dirs) {
+    File fDir = Content.asFolder(dirs);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXDOWNLOADS: not posssible or not valid: %s", fDir);
     }
     SXDOWNLOADS = fDir.getAbsolutePath();
@@ -916,9 +909,7 @@ public class SX {
    */
   public static String getSXNATIVE() {
     if (isNotSet(SXNATIVE)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFolder(fBase, SXNATIVEdefault);
-      setSXNATIVE(fDir);
+      setSXNATIVE(getSXAPP(), SXNATIVEdefault);
     }
     return SXNATIVE;
   }
@@ -926,8 +917,8 @@ public class SX {
   static String SXNATIVE = "";
   static String SXNATIVEdefault = "Native";
 
-  public static String setSXNATIVE(Object oDir) {
-    File fDir = Content.asFolder(oDir);
+  public static String setSXNATIVE(Object... dirs) {
+    File fDir = Content.asFolder(dirs);
     if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
       terminate(1, "setSXNATIVE: not posssible or not valid: %s", fDir);
     }
@@ -942,9 +933,7 @@ public class SX {
    */
   public static String getSXLIB() {
     if (isNotSet(SXLIB)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFile(fBase, SXLIBdefault);
-      setSXLIB(fDir);
+      setSXLIB(getSXAPP(), SXLIBdefault);
     }
     return SXLIB;
   }
@@ -952,12 +941,9 @@ public class SX {
   static String SXLIB = "";
   static String SXLIBdefault = "LIB";
 
-  public static String setSXLIB(Object oDir) {
-    File fDir = Content.asFile(oDir, null);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXLIB(Object... dirs) {
+    File fDir = Content.asFolder(dirs, null);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXLIB: not posssible or not valid: %s", fDir);
     }
     SXLIB = fDir.getAbsolutePath();
@@ -971,9 +957,7 @@ public class SX {
    */
   public static String getSXSTORE() {
     if (isNotSet(SXSTORE)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFile(fBase, SXSTOREdefault);
-      setSXSTORE(fDir);
+      setSXSTORE(getSXAPP(), SXSTOREdefault);
     }
     return SXSTORE;
   }
@@ -981,9 +965,9 @@ public class SX {
   static String SXSTORE = "";
   static String SXSTOREdefault = "Store";
 
-  public static String setSXSTORE(Object oDir) {
-    File fDir = Content.asFolder(oDir);
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXSTORE(Object... dirs) {
+    File fDir = Content.asFolder(dirs);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXSTORE: not posssible or not valid: %s", fDir);
     }
     SXSTORE = fDir.getAbsolutePath();
@@ -997,9 +981,7 @@ public class SX {
    */
   public static String getSXEDITOR() {
     if (isNotSet(SXEDITOR)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFolder(fBase, SXEDITORdefault);
-      setSXEDITOR(fDir);
+      setSXEDITOR(getSXAPP(), SXEDITORdefault);
     }
     return SXEDITOR;
   }
@@ -1007,12 +989,9 @@ public class SX {
   static String SXEDITOR = "";
   static String SXEDITORdefault = "Extensions/SXEditor";
 
-  public static String setSXEDITOR(Object oDir) {
-    File fDir = Content.asFile(oDir);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXEDITOR(Object... dirs) {
+    File fDir = Content.asFolder(dirs);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXEDITOR: not posssible or not valid: %s", fDir);
     }
     SXEDITOR = fDir.getAbsolutePath();
@@ -1026,9 +1005,7 @@ public class SX {
    */
   public static String getSXTESSERACT() {
     if (isNotSet(SXTESSERACT)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFile(fBase, SXTESSERACTdefault);
-      setSXTESSERACT(fDir);
+      setSXTESSERACT(getSXAPP(), SXTESSERACTdefault);
     }
     return SXTESSERACT;
   }
@@ -1036,12 +1013,9 @@ public class SX {
   static String SXTESSERACT = "";
   static String SXTESSERACTdefault = "TESSERACT";
 
-  public static String setSXTESSERACT(Object oDir) {
-    File fDir = Content.asFile(oDir, null);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXTESSERACT(Object... dirs) {
+    File fDir = Content.asFile(dirs, null);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXTESSERACT: not posssible or not valid: %s", fDir);
     }
     SXTESSERACT = fDir.getAbsolutePath();
@@ -1055,9 +1029,7 @@ public class SX {
    */
   public static String getSXEXTENSIONSFOLDER() {
     if (isNotSet(EXTENSIONSFOLDER)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFile(fBase, EXTENSIONSdefault);
-      setSXEXTENSIONS(fDir);
+      setSXEXTENSIONS(getSXAPP(), EXTENSIONSdefault);
     }
     return EXTENSIONSFOLDER;
   }
@@ -1067,12 +1039,9 @@ public class SX {
 
   static String[] theExtensions = new String[]{"selenium4sikulix"};
 
-  public static String setSXEXTENSIONS(Object oDir) {
-    File fDir = Content.asFile(oDir, null);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXEXTENSIONS(Object... dirs) {
+    File fDir = Content.asFile(dirs, null);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXEXTENSIONS: not posssible or not valid: %s", fDir);
     }
     EXTENSIONSFOLDER = fDir.getAbsolutePath();
@@ -1086,9 +1055,7 @@ public class SX {
    */
   public static String getSXIMAGES() {
     if (isNotSet(SXIMAGES)) {
-      String fBase = getSXAPP();
-      File fDir = Content.asFolder(fBase, SXIMAGESdefault);
-      setSXIMAGES(fDir);
+      setSXIMAGES(getSXAPP(), SXIMAGESdefault);
     }
     return SXIMAGES;
   }
@@ -1096,12 +1063,9 @@ public class SX {
   static String SXIMAGES = "";
   static String SXIMAGESdefault = "Images";
 
-  public static String setSXIMAGES(Object oDir) {
-    File fDir = Content.asFile(oDir, null);
-    if (isSet(fDir)) {
-      fDir.mkdirs();
-    }
-    if (isNotSet(fDir) || !Content.existsFile(fDir) || !fDir.isDirectory()) {
+  public static String setSXIMAGES(Object... dirs) {
+    File fDir = Content.asFolder(dirs);
+    if (!Content.existsFile(fDir)) {
       terminate(1, "setSXIMAGES: not posssible or not valid: %s", fDir);
     }
     SXIMAGES = fDir.getAbsolutePath();

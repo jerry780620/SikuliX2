@@ -1169,7 +1169,7 @@ public class Tool {
         return;
       }
     }
-    if (Content.existsImageFile(savePath, imageToSave.getName())) {
+    if (Content.existsFile(savePath, Content.asImageFilename(imageToSave.getName()))) {
       if (!Do.popAsk(new File(savePath, imageToSave.getName()).getAbsolutePath() +
               "\nOverwrite image file?", "SikuliX Tool::ImageSave", box)) {
         return;

@@ -1255,12 +1255,12 @@ public class Element implements Comparable<Element> {
   }
 
   public String save(String name, String path) {
-    URL url = Content.makeURL(new File(path, name).getAbsolutePath());
+    URL url = Content.asURL(new File(path, name).getAbsolutePath());
     if (SX.isNull(url)) {
       return "";
     }
     try {
-      url = Content.makeURL(new File(path, name).getCanonicalPath());
+      url = Content.asURL(new File(path, name).getCanonicalPath());
       return save(url, name);
     } catch (IOException e) {
     }
@@ -1269,7 +1269,7 @@ public class Element implements Comparable<Element> {
   }
 
   public String save(String name, URL urlPath) {
-    URL url = Content.makeURL(urlPath, name);
+    URL url = Content.asURL(urlPath, name);
     if (SX.isNotNull(url)) {
       return save(url, name);
     } else {
