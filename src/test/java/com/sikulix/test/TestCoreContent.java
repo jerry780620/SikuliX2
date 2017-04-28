@@ -111,15 +111,20 @@ public class TestCoreContent {
     if (currentTest.shouldNotRun()) {
       return;
     }
-    Map<Object, URL> testCases = new HashMap<>();
-    testCases.put(SX.getSXIMAGES(), null);
-    testCases.put(SXTest.jarImagePathDefault, null);
-    testCases.put(SXTest.jarImagePathClass, null);
-    testCases.put(SXTest.gitImagePath, null);
+    Map<Object, String> testCases = new HashMap<>();
+    testCases.put(SX.getSXIMAGES(), "/Sikulix/SX2/Images");
+    testCases.put(SXTest.jarImagePathDefault, "target/classes/SX_Images");
+    testCases.put(SXTest.jarImagePathClass, ".jar!/SX_Images");
+    testCases.put(SXTest.gitImagePath, "https://raw.githubusercontent.com/RaiMan/SikuliX2/master/src/main/resources/SX_Images");
+    String expectedSub = "/sub1/sub2/sub3";
     for (Object given : testCases.keySet()) {
-      URL expected = testCases.get(given);
+      String expected = testCases.get(given);
       URL path = Content.asURL(given);
+      assert Content.asPath(path).endsWith(expected) :
+              currentTest.failed("asURL(%s) is %s: ", given, path);
       URL pathSub = Content.asURL(path, "/sub1///sub2/", "/sub3//");
+      assert Content.asPath(pathSub).endsWith(expected + expectedSub) :
+              currentTest.failed("asURL(%s, ...) is %s: ", given, pathSub);
       currentTest.addResult(String.format("\n*** testcase: %s\n%s\n%s", given, path, pathSub));
     }
   }
@@ -226,16 +231,48 @@ public class TestCoreContent {
       return;
     }
     Content.clearImagePath();
-    Content.setBundlePath(SXTest.jarImagePathDefault);
+    Content.setBundlePath();
+    Content.getImagePath().add(SXTest.jarImagePathDefault);
     Content.getImagePath().add(SXTest.jarImagePathClass);
     Content.getImagePath().add(SXTest.gitImagePath);
+    int pos = Content.getImagePath().add(SX.getSXIMAGES());
+    assert pos == 0 : currentTest.failed("ImagePath.add: duplicate added: %s", SX.getSXIMAGES());
+    pos = Content.getImagePath().add(SXTest.jarImagePathDefault);
+    assert pos == 1 : currentTest.failed("ImagePath.add: duplicate added: %s", SXTest.jarImagePathDefault);
+    pos = Content.getImagePath().add(SXTest.jarImagePathClass);
+    assert pos == 2 : currentTest.failed("ImagePath.add: duplicate added: %s", SXTest.jarImagePathClass);
+    pos = Content.getImagePath().add(SXTest.gitImagePath);
+    assert pos == 3 : currentTest.failed("ImagePath.add: duplicate added: %s", SXTest.gitImagePath);
     String[] paths = Content.getImagePath().getAll();
     currentTest.setResult("[");
     for (String path : paths) {
       currentTest.addResult(path + ",");
     }
     currentTest.addResult("]");
-    assert 3 == paths.length;
+    assert 4 == paths.length;
   }
 
+  @Test
+  public void test_069_locateImageOnImagePath() {
+    currentTest = new SXTest();
+    if (currentTest.shouldNotRun()) {
+      return;
+    }
+    String image = SXTest.imageNameDefault;
+    String imageJar = SXTest.imageNameGoogle;
+    Content.setBundlePath();
+    Content.getImagePath().add(SXTest.jarImagePathDefault);
+    Content.getImagePath().add(SXTest.jarImagePathClass);
+    Content.getImagePath().add(SXTest.gitImagePath);
+    URL url = Content.onImagePath(image);
+    assert SX.isNotNull(url) : currentTest.failed("not on imagepath: %s", image);
+    currentTest.addResult(image);
+    url = Content.onImagePath("foobar");
+    assert SX.isNull(url) : currentTest.failed("should not be on imagepath: %s", "foobar");
+    currentTest.addResult("!foobar");
+    url = Content.onImagePath(imageJar);
+    assert SX.isNotNull(url) : currentTest.failed("not on imagepath: %s", imageJar);
+    currentTest.addResult(imageJar);
+    //currentTest.setResult("%s", url);
+  }
 }

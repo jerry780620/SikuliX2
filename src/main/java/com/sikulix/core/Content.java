@@ -1035,11 +1035,54 @@ public class Content {
   }
 
   public static boolean existsFile(Object... args) {
-    File file = asFile(args);
-    if (SX.isNull(file)) {
-      return false;
+    boolean exists = false;
+    URL url = asURL(args);
+    if (SX.isNotNull(url)) {
+      if ("file".equals(url.getProtocol())) {
+        File file = new File(asPath(url));
+        if (SX.isNull(file)) {
+          return false;
+        }
+        exists = file.exists();
+      } else if ("jar".equals(url.getProtocol())) {
+        exists = isInJar(url);
+      } else if (url.getProtocol().startsWith("http")) {
+        if (1 == isUrlUseabel(url)) exists = true;
+      }
     }
-    return (file.exists());
+    return exists;
+  }
+
+  private static boolean isInJar(URL jarURL, String... resources) {
+    String jarSep = "!/";
+    ZipInputStream jarZip = null;
+    String jarPath = asPath(jarURL);
+    String resource = null;
+    boolean found = false;
+    if (jarPath.contains(jarSep)) {
+      String[] parts = jarPath.split(jarSep);
+      jarPath = parts[0];
+      resource = parts[1];
+      try {
+        jarURL = new URL("file:" + jarPath);
+      } catch (MalformedURLException e) {
+        log.error("isInjar: invalid: %s (%s)", jarPath, e.getMessage());
+      }
+    }
+    try {
+      jarZip = new ZipInputStream(jarURL.openStream());
+      ZipEntry entry = jarZip.getNextEntry();
+      while (entry != null) {
+        if (resource.equals(entry.toString())) {
+          found = true;
+          break;
+        }
+        entry = jarZip.getNextEntry();
+      }
+    } catch (Exception ex) {
+      log.error("isInJar: error: %s", ex.getMessage());
+    }
+    return found;
   }
 
   public static File asFolder(Object... args) {
@@ -2542,15 +2585,18 @@ public class Content {
    * starting from entry 0, the first found existence is taken<br>
    * absolute file names are checked for existence
    *
-   * @param name relative or absolute filename
+   * @param names one or more name fragments to form a path
    * @return a valid URL or null if not found/exists
    */
-  public static URL searchOnImagePath(String name) {
+  public static URL onImagePath(String... names) {
+    String name = asPath(concatenateFolders(0, names));
     name = asImageFilename(name);
     URL url = null;
     File file = new File(name);
-    if (file.isAbsolute() && file.exists()) {
-      url = asURL(name);
+    if (file.isAbsolute()) {
+      if (file.exists()) {
+        url = asURL(name);
+      }
     } else {
       for (URL path : getImagePath().all()) {
         url = asURL(path, name);
@@ -2559,9 +2605,6 @@ public class Content {
         }
         url = null;
       }
-    }
-    if (url == null) {
-      log.error("searchOnImagePath: does not exist: " + name);
     }
     return url;
   }

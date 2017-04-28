@@ -11,6 +11,8 @@ public class SXTest extends SXError {
   public static String mavenRoot = "target/classes";
   public static String gitRoot = "https://raw.githubusercontent.com/RaiMan/SikuliX2/master";
   public static String gitImagePath = gitRoot + "/src/main/resources/" + defaultImagePath;
+  public static String imageNameDefault = "sikulix2";
+  public static String imageNameGoogle = "google";
 
   private boolean local = false;
 

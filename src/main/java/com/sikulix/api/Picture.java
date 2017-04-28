@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
 
 public class Picture extends Element {
 
@@ -157,7 +156,7 @@ public class Picture extends Element {
   }
 
   private void setContent(String fpImg) {
-    URL url = Content.searchOnImagePath(fpImg);
+    URL url = Content.onImagePath(fpImg);
     if (SX.isSet(url)) {
       setContent(url);
     } else {
