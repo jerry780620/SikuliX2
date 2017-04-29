@@ -20,7 +20,7 @@ script:
  - mvn test -B
  - if [ $TRAVIS_TEST_RESULT -eq 0 ]; then
       mvn deploy -DskipTests=true -P sign,build-extras --settings codesigning/mvnsettings.xml;
- - ". support/createJavadocs"
+      ". support/createJavadocs";
    fi
 deploy:
   provider: pages
