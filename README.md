@@ -20,7 +20,7 @@ Travis CI (Ubuntu 12.04-64, Java 8, xvfb)
 
 <hr>
 
-**BE AWARE** The use for scripting and Java programming is only possible after the first nightly builds are available. Currently you might fork the project and make your tests in the project context. Issues and pull requests are only accepted here on Github.
+**BE AWARE** For use with Java aware scripting and Java programming you might need additional stuff and steps at your own resposibility. Currently you might also fork the project and make your tests in the project context. Issues and pull requests are only accepted here on Github.
 
 <hr>
 
