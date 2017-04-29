@@ -1,0 +1,15 @@
+#!/bin/bash
+# creates the javadocs for selected classes and their public members
+apijar=target/sikulixapi-2.0.0-SNAPSHOT.jar
+apisrc=src/main/java/com/sikulix/api
+echo $apisrc/Do.java >createJavadocsClasses
+echo $apisrc/Element.java >>createJavadocsClasses
+echo $apisrc/Event.java >>createJavadocsClasses
+echo $apisrc/Handler.java >>createJavadocsClasses
+echo $apisrc/Picture.java >>createJavadocsClasses
+echo $apisrc/Story.java >>createJavadocsClasses
+echo $apisrc/Symbol.java >>createJavadocsClasses
+echo $apisrc/Target.java >>createJavadocsClasses
+echo $apisrc/Window.java >>createJavadocsClasses
+echo $apisrc/By.java >>createJavadocsClasses
+javadoc -public -classpath $apijar -d pages/javadocs @createJavadocsClasses
