@@ -1047,7 +1047,8 @@ public class Content {
       } else if ("jar".equals(url.getProtocol())) {
         exists = isInJar(url);
       } else if (url.getProtocol().startsWith("http")) {
-        if (1 == isUrlUseabel(url)) exists = true;
+        int urlUseable = isUrlUseabel(url);
+        exists = 1 == urlUseable;
       }
     }
     return exists;
@@ -2508,6 +2509,15 @@ public class Content {
 
     List<URL> all() {
       return pathList;
+    }
+
+    public void dump() {
+      String[] paths = getAll("");
+      int n = 0;
+      for (String path : paths) {
+        log.p("***** Path (%d): %s", n, path);
+        n++;
+      }
     }
 
     public int add(Object... args) {

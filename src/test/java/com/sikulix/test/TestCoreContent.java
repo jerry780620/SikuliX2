@@ -39,6 +39,7 @@ public class TestCoreContent {
   @After
   public void tearDown() {
     log.info("!%s", currentTest);
+    Content.clearImagePath();
   }
 
   @Test
@@ -230,7 +231,6 @@ public class TestCoreContent {
     if (currentTest.shouldNotRun()) {
       return;
     }
-    Content.clearImagePath();
     Content.setBundlePath();
     Content.getImagePath().add(SXTest.jarImagePathDefault);
     Content.getImagePath().add(SXTest.jarImagePathClass);
@@ -261,17 +261,21 @@ public class TestCoreContent {
     String image = SXTest.imageNameDefault;
     String imageJar = SXTest.imageNameGoogle;
     Content.setBundlePath();
-    Content.getImagePath().add(SXTest.jarImagePathDefault);
-    Content.getImagePath().add(SXTest.jarImagePathClass);
     Content.getImagePath().add(SXTest.gitImagePath);
+    Content.getImagePath().add(SXTest.jarImagePathClass);
     URL url = Content.onImagePath(image);
-    assert SX.isNotNull(url) : currentTest.failed("not on imagepath: %s", image);
+    assert SX.isNotNull(url) :
+            currentTest.failed("not on imagepath: %s", image);
+    assert url.getProtocol().startsWith("http") :
+            currentTest.failed("should be http: %s", image);
     currentTest.addResult(image);
     url = Content.onImagePath("foobar");
-    assert SX.isNull(url) : currentTest.failed("should not be on imagepath: %s", "foobar");
+    assert SX.isNull(url) :
+            currentTest.failed("should not be on imagepath: %s", "foobar");
     currentTest.addResult("!foobar");
     url = Content.onImagePath(imageJar);
-    assert SX.isNotNull(url) : currentTest.failed("not on imagepath: %s", imageJar);
+    assert SX.isNotNull(url) && url.getProtocol().startsWith("jar") :
+            currentTest.failed("not on imagepath: %s", imageJar);
     currentTest.addResult(imageJar);
     //currentTest.setResult("%s", url);
   }
