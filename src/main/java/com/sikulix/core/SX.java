@@ -1464,12 +1464,16 @@ public class SX {
         String prefix = "";
         if (name.startsWith("getAll")) {
           prefix = "getAll";
+        } else if (name.startsWith("get")) {
+          prefix = "get";
         } else if (name.startsWith("set")) {
           prefix = "set";
         } else if (name.startsWith("isSet")) {
           prefix = "isSet";
         } else if (name.startsWith("is")) {
           prefix = "is";
+        } else if (name.startsWith("on")) {
+          prefix = "on";
         } else if (name.startsWith("isValid")) {
           prefix = "isValid";
         } else if (name.startsWith("has")) {

@@ -548,7 +548,7 @@ public class Do {
         prefix = prefix.substring(0, prefix.length() - 1);
       }
     }
-    return Content.buildJar(targetJar, new String[]{null}, new String[]{sourceFolder}, new String[]{prefix}, null);
+    return Content.zipJar(targetJar, new String[]{null}, new String[]{sourceFolder}, new String[]{prefix}, null);
   }
   //</editor-fold>
 

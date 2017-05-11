@@ -9,7 +9,6 @@ import org.junit.*;
 import org.junit.runners.MethodSorters;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +140,7 @@ public class TestCoreContent {
     testCases.add("target");
     testCases.add("test-");
     for (String given : testCases) {
-      URL expectedURL = Content.onClasspath(given);
+      URL expectedURL = Content.getClasspath(given);
       if (SX.isNull(expectedURL)) {
         Content.dumpClasspath();
       }
@@ -150,7 +149,7 @@ public class TestCoreContent {
       assert expectedURL.getProtocol().equals("file") :
               currentTest.failed("url protocol not file: %s", expectedURL);
       currentTest.addResult("[found: %s]", given);
-      assert Content.isOnClasspath(expectedURL) :
+      assert Content.onClasspath(expectedURL) :
               currentTest.failed("not on classpath: %s", expectedURL);
       String path = expectedURL.getPath();
       String name = new File(expectedURL.getPath()).getName();

@@ -187,13 +187,24 @@ public class Content {
     log.p("*** classpath dump end");
   }
 
-  public static boolean addToClasspath(String jarOrFolder) {
+  public static URL getClasspath(String given) {
+    given = normalize(given).toUpperCase();
+    URL expectedURL = null;
+    for (URL entry : listClasspath()) {
+      if (normalize(entry.getPath()).toUpperCase().contains(given)) {
+        expectedURL = entry;
+      }
+    }
+    return expectedURL;
+  }
+
+  public static boolean setClasspath(String jarOrFolder) {
     URL uJarOrFolder = Content.asURL(jarOrFolder);
     if (!new File(jarOrFolder).exists()) {
       log.debug("addToClasspath: does not exist - not added:\n%s", jarOrFolder);
       return false;
     }
-    if (isOnClasspath(uJarOrFolder)) {
+    if (onClasspath(uJarOrFolder)) {
       return true;
     }
     log.debug("addToClasspath:\n%s", uJarOrFolder);
@@ -212,7 +223,7 @@ public class Content {
     return true;
   }
 
-  public static boolean isOnClasspath(Object given) {
+  public static boolean onClasspath(Object given) {
     URL expectedURL = null;
     if (given instanceof URL) {
       expectedURL = (URL) given;
@@ -227,17 +238,6 @@ public class Content {
       }
     }
     return false;
-  }
-
-  public static URL onClasspath(String given) {
-    given = normalize(given).toUpperCase();
-    URL expectedURL = null;
-    for (URL entry : listClasspath()) {
-      if (normalize(entry.getPath()).toUpperCase().contains(given)) {
-        expectedURL = entry;
-      }
-    }
-    return expectedURL;
   }
   //</editor-fold>
 
@@ -352,7 +352,7 @@ public class Content {
     return fSikuliDir.getAbsolutePath();
   }
 
-  public static boolean packJar(String folderName, String jarName, String prefix) {
+  public static boolean zipJar(String folderName, String jarName, String prefix) {
     jarName = Content.slashify(jarName, false);
     if (!jarName.endsWith(".jar")) {
       jarName += ".jar";
@@ -387,8 +387,8 @@ public class Content {
     return true;
   }
 
-  public static boolean buildJar(String targetJar, String[] jars,
-                                 String[] files, String[] prefixs, JarFileFilter filter) {
+  public static boolean zipJar(String targetJar, String[] jars,
+                               String[] files, String[] prefixs, JarFileFilter filter) {
     boolean logShort = false;
     if (targetJar.startsWith("#")) {
       logShort = true;
@@ -458,8 +458,8 @@ public class Content {
    * @param filter     to select specific content
    * @return true if success,  false otherwise
    */
-  public static boolean unpackJar(String jarName, String folderName,
-                                  boolean del, boolean strip, JarFileFilter filter) {
+  public static boolean unzipJar(String jarName, String folderName,
+                                 boolean del, boolean strip, JarFileFilter filter) {
     jarName = Content.slashify(jarName, false);
     if (!jarName.endsWith(".jar")) {
       jarName += ".jar";
@@ -1410,39 +1410,39 @@ public class Content {
     return slashify(fpFile + jarSuffix, withTrailingSlash);
   }
 
-  private static String makeFileListString;
-  private static String makeFileListPrefix;
-
-  public static String makeFileList(File path, String prefix) {
-    makeFileListPrefix = prefix;
-    return makeFileListDo(path, true);
-  }
-
-  private static String makeFileListDo(File path, boolean starting) {
-    String x;
-    if (starting) {
-      makeFileListString = "";
-    }
-    if (!path.exists()) {
-      return makeFileListString;
-    }
-    if (path.isDirectory()) {
-      String[] fcl = path.list();
-      for (String fc : fcl) {
-        makeFileListDo(new File(path, fc), false);
-      }
-    } else {
-      x = path.getAbsolutePath();
-      if (!makeFileListPrefix.isEmpty()) {
-        x = x.replace(makeFileListPrefix, "").replace("\\", "/");
-        if (x.startsWith("/")) {
-          x = x.substring(1);
-        }
-      }
-      makeFileListString += x + "\n";
-    }
-    return makeFileListString;
-  }
+//  private static String makeFileListString;
+//  private static String makeFileListPrefix;
+//
+//  public static String makeFileList(File path, String prefix) {
+//    makeFileListPrefix = prefix;
+//    return makeFileListDo(path, true);
+//  }
+//
+//  private static String makeFileListDo(File path, boolean starting) {
+//    String x;
+//    if (starting) {
+//      makeFileListString = "";
+//    }
+//    if (!path.exists()) {
+//      return makeFileListString;
+//    }
+//    if (path.isDirectory()) {
+//      String[] fcl = path.list();
+//      for (String fc : fcl) {
+//        makeFileListDo(new File(path, fc), false);
+//      }
+//    } else {
+//      x = path.getAbsolutePath();
+//      if (!makeFileListPrefix.isEmpty()) {
+//        x = x.replace(makeFileListPrefix, "").replace("\\", "/");
+//        if (x.startsWith("/")) {
+//          x = x.substring(1);
+//        }
+//      }
+//      makeFileListString += x + "\n";
+//    }
+//    return makeFileListString;
+//  }
 
   /**
    * compares to path strings using java.io.File.equals()
@@ -1825,7 +1825,7 @@ public class Content {
         return null;
       }
     } else {
-      uaJar = onClasspath(aJar);
+      uaJar = getClasspath(aJar);
       if (uaJar == null) {
         log.error("extractResourcesToFolderFromJar: not on classpath: %s", aJar);
         return null;

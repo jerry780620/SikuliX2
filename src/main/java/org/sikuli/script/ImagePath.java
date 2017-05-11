@@ -4,17 +4,14 @@
 
 package org.sikuli.script;
 
+import com.sikulix.api.Do;
 import com.sikulix.core.Content;
 import com.sikulix.core.SX;
 
 public class ImagePath {
 
   public static String[] get() {
-    return Content.getImagePath().getAll();
-  }
-
-  private static boolean bundleEquals(Object path) {
-    return Content.equalsPath(path.toString(), Content.getBundlePath());
+    return Do.getImagePath();
   }
 
   public static boolean add(String mainPath) {
