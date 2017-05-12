@@ -6,6 +6,7 @@ package com.sikulix.core;
 
 //import com.sikulix.scripting.JythonHelper;
 
+import com.sikulix.devices.LocalDevice;
 import org.apache.commons.cli.*;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;

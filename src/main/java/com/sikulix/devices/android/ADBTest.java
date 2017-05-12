@@ -2,7 +2,7 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.remote.android;
+package com.sikulix.devices.android;
 
 import com.sikulix.api.Do;
 import com.sikulix.api.Picture;

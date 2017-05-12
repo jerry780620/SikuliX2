@@ -2,7 +2,7 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.remote.server;
+package com.sikulix.devices.server;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;

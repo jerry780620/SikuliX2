@@ -2,28 +2,34 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.remote.android;
+package com.sikulix.devices.server;
 
 import com.sikulix.api.Element;
 import com.sikulix.api.Picture;
-import com.sikulix.core.IDevice;
+import com.sikulix.devices.IDevice;
 
 import java.awt.Rectangle;
 
-public class AndroidDevice implements IDevice{
+public class ServerDevice implements IDevice {
+
   @Override
   public IDevice start(Object... args) {
-    return null;
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        Server.start(new String[0]);
+      }
+    }).start();
+    return this;
+  }
+
+  public boolean isValid() {
+    return true;
   }
 
   @Override
   public void stop() {
 
-  }
-
-  @Override
-  public boolean isValid() {
-    return false;
   }
 
   @Override
@@ -116,32 +122,16 @@ public class AndroidDevice implements IDevice{
 
   }
 
-  /**
-   * move the mouse from the current position to the offset given by the parameters
-   *
-   * @param xoff horizontal offset (&lt; 0 left, &gt; 0 right)
-   * @param yoff vertical offset (&lt; 0 up, &gt; 0 down)
-   * @return the new mouseposition as Element (might be invalid)
-   */
   @Override
   public Element move(int xoff, int yoff) {
     return null;
   }
 
-  /**
-   * move the mouse to the target of given Element (default center)
-   *
-   * @param loc
-   * @return the new mouseposition as Element (might be invalid)
-   */
   @Override
   public Element move(Element loc) {
     return null;
   }
 
-  /**
-   * @return the current mouseposition as Element (might be invalid)
-   */
   @Override
   public Element at() {
     return null;

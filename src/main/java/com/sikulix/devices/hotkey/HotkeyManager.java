@@ -2,8 +2,11 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.core;
+package com.sikulix.devices.hotkey;
 
+import com.sikulix.devices.Keys;
+import com.sikulix.core.SX;
+import com.sikulix.core.SXLog;
 import com.tulskiy.keymaster.common.HotKey;
 import com.tulskiy.keymaster.common.HotKeyListener;
 import com.tulskiy.keymaster.common.Provider;

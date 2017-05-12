@@ -5,6 +5,9 @@
 package com.sikulix.api;
 
 import com.sikulix.core.*;
+import com.sikulix.devices.IDevice;
+import com.sikulix.devices.hook.NativeHook;
+import com.sikulix.devices.hotkey.HotkeyCallback;
 import com.sikulix.util.FileChooser;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.sikuli.script.Key;

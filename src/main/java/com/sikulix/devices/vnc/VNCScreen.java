@@ -1,12 +1,10 @@
 /*
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
-package com.sikulix.remote.vnc;
+package com.sikulix.devices.vnc;
 
 import com.sikulix.api.Picture;
-import org.sikuli.script.FindFailed;
 import org.sikuli.script.IScreen;
-import org.sikuli.script.Location;
 import org.sikuli.script.Region;
 
 import java.awt.*;

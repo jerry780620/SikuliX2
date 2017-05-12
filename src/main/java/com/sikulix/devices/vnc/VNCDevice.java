@@ -2,11 +2,12 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.remote.vnc;
+package com.sikulix.devices.vnc;
 
 import com.sikulix.api.Element;
 import com.sikulix.api.Picture;
 import com.sikulix.core.*;
+import com.sikulix.devices.IDevice;
 
 import java.awt.Rectangle;
 import java.io.Closeable;
@@ -99,7 +100,6 @@ public class VNCDevice implements IDevice, Closeable {
       parameters.initParameters(this, args);
       try {
         client = VNCClient.connect(ip, port, password, true);
-        devices.add(this);
         new Thread(new Runnable() {
           @Override
           public void run() {
@@ -124,6 +124,7 @@ public class VNCDevice implements IDevice, Closeable {
 
   @Override
   public void stop() {
+    devices.remove(this);
     close();
   }
 

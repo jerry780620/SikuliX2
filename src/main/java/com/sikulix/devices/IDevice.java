@@ -2,11 +2,10 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.core;
+package com.sikulix.devices;
 
 import com.sikulix.api.Element;
 import com.sikulix.api.Picture;
-import org.sikuli.script.Screen;
 
 import java.awt.*;
 

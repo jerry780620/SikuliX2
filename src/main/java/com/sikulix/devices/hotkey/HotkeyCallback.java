@@ -2,7 +2,7 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.core;
+package com.sikulix.devices.hotkey;
 
 public abstract class HotkeyCallback {
 

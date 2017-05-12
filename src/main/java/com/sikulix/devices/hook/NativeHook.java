@@ -2,8 +2,10 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.core;
+package com.sikulix.devices.hook;
 
+import com.sikulix.core.SX;
+import com.sikulix.core.SXLog;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.NativeInputEvent;

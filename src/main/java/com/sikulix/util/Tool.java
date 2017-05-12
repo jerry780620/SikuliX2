@@ -6,6 +6,9 @@ package com.sikulix.util;
 
 import com.sikulix.api.*;
 import com.sikulix.core.*;
+import com.sikulix.devices.hotkey.HotkeyCallback;
+import com.sikulix.devices.hotkey.HotkeyEvent;
+import com.sikulix.devices.hotkey.HotkeyManager;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 

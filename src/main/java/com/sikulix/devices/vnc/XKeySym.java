@@ -2,7 +2,7 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.remote.vnc;
+package com.sikulix.devices.vnc;
 
 class XKeySym
 {

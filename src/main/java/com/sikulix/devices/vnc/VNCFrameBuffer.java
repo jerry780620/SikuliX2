@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
-package com.sikulix.remote.vnc;
+package com.sikulix.devices.vnc;
 
 import com.tigervnc.rfb.PixelBuffer;
 import com.tigervnc.rfb.PixelFormat;

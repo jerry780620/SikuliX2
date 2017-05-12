@@ -2,10 +2,12 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.core;
+package com.sikulix.devices;
 
 import com.sikulix.api.*;
 import com.sikulix.api.Event;
+import com.sikulix.core.*;
+import com.sikulix.devices.hook.NativeHook;
 import com.sikulix.util.animation.Animator;
 import com.sikulix.util.animation.AnimatorOutQuarticEase;
 import com.sikulix.util.animation.AnimatorTimeBased;

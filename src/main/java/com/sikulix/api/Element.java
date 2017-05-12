@@ -5,6 +5,9 @@
 package com.sikulix.api;
 
 import com.sikulix.core.*;
+import com.sikulix.devices.IDevice;
+import com.sikulix.devices.Keys;
+import com.sikulix.devices.LocalDevice;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.opencv.core.*;

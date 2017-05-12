@@ -4,6 +4,8 @@
 package org.sikuli.script;
 
 import com.sikulix.core.*;
+import com.sikulix.devices.hotkey.HotkeyCallback;
+import com.sikulix.devices.hotkey.HotkeyManager;
 
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
