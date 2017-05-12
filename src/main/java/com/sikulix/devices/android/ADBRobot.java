@@ -31,9 +31,9 @@ public class ADBRobot {
   final static int MAX_DELAY = 60000;
 
   private ADBScreen screen;
-  private ADBGadget device;
+  private ADBDevice device;
 
-  public ADBRobot(ADBScreen screen, ADBGadget device) {
+  public ADBRobot(ADBScreen screen, ADBDevice device) {
     this.screen = screen;
     this.device = device;
   }

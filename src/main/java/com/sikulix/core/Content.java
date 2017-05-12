@@ -158,6 +158,15 @@ public class Content {
   //</editor-fold>
 
   //<editor-fold desc="010*** java class path">
+  public static String whereIs(Class clazz) {
+    CodeSource codeSrc = clazz.getProtectionDomain().getCodeSource();
+    String base = null;
+    if (codeSrc != null && codeSrc.getLocation() != null) {
+      base = slashify(codeSrc.getLocation().getPath(), false);
+    }
+    return base;
+  }
+
   public static List<URL> listClasspath() {
     URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
     return Arrays.asList(sysLoader.getURLs());
@@ -657,7 +666,6 @@ public class Content {
     }
     return sb.toString();
   }
-
   //</editor-fold>
 
   //<editor-fold desc="025*** filter">

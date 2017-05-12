@@ -48,7 +48,7 @@ public class ADBTest {
       adbs.wakeUp(2);
       adbs.wait(1f);
       if (runTests) {
-        adbs.aKey(ADBGadget.KEY_HOME);
+        adbs.aKey(ADBDevice.KEY_HOME);
         adbs.wait(1f);
       }
     }
@@ -76,7 +76,7 @@ public class ADBTest {
     String title = "Android Support - Testing device";
     Do.popup("Take care\n\nthat device is on and unlocked\n\nbefore clicking ok", title);
     aScr.wakeUp(2);
-    aScr.aKey(ADBGadget.KEY_HOME);
+    aScr.aKey(ADBDevice.KEY_HOME);
     if (Do.popAsk("Now the device should show the HOME screen.\n" +
             "\nclick YES to proceed watching the test on the device" +
             "\nclick NO to end the test now", title)) {

@@ -10,7 +10,7 @@ import com.sikulix.devices.IDevice;
 
 import java.awt.Rectangle;
 
-public class ServerDevice implements IDevice {
+public class ServerDevice extends IDevice {
 
   @Override
   public IDevice start(Object... args) {

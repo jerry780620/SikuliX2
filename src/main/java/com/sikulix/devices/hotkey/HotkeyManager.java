@@ -4,7 +4,7 @@
 
 package com.sikulix.devices.hotkey;
 
-import com.sikulix.devices.Keys;
+import com.sikulix.devices.local.Keys;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 import com.tulskiy.keymaster.common.HotKey;

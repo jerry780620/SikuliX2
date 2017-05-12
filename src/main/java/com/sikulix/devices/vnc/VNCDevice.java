@@ -8,6 +8,7 @@ import com.sikulix.api.Element;
 import com.sikulix.api.Picture;
 import com.sikulix.core.*;
 import com.sikulix.devices.IDevice;
+import com.sikulix.vnc.*;
 
 import java.awt.Rectangle;
 import java.io.Closeable;
@@ -15,7 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VNCDevice implements IDevice, Closeable {
+public class VNCDevice extends IDevice implements Closeable {
 
   static SXLog log;
 
@@ -26,7 +27,11 @@ public class VNCDevice implements IDevice, Closeable {
   }
 
   private static String parameterNames = "ip,port,password,user,connectionTimeout,timeout";
-  private static String parameterClass = "s,i,s,s,i,i";
+  private static String parameterClass = "s,i,h,s,i,i";
+  private static Object[] parameterDefaults = new Object[]{"127.0.0.1", 5900, null, null, 10, 1000};
+  private static Object[] parameterNotSet = new Object[]{"", 0, null, null, 0, 0};
+
+  private static Parameters parameters = new Parameters(parameterNames, parameterClass, parameterDefaults, parameterNotSet);
 
   //<editor-fold desc="parameter: getter, setter">
   public String getIp() {
@@ -78,8 +83,6 @@ public class VNCDevice implements IDevice, Closeable {
   }
   //</editor-fold>
 
-  Parameters parameters = new Parameters(parameterNames, parameterClass);
-
   private static List<IDevice> devices = new ArrayList<>();
 
   private String ip = null;
@@ -95,48 +98,43 @@ public class VNCDevice implements IDevice, Closeable {
 
   @Override
   public IDevice start(Object... args) {
-    if (args.length > 0) {
-      log.trace("start(): trying ...");
-      parameters.initParameters(this, args);
-      try {
-        client = VNCClient.connect(ip, port, password, true);
-        new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              client.processMessages();
-            } catch (RuntimeException e) {
-              if (!closed) {
-                throw e;
-              }
+    load(this.getClass());
+    parameters.initParameters(this, args);
+    log.trace("start(): %s", parameters);
+    try {
+      client = VNCClient.connect(ip, port, password, true);
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            client.processMessages();
+          } catch (RuntimeException e) {
+            if (!closed) {
+              throw e;
             }
           }
-        }).start();
-        capture();
-        devices.add(this);
-        return this;
-      } catch (Exception e) {
-        log.error("VNCClient.connect: did not work: %s", e.getMessage());
-      }
+        }
+      }).start();
+      capture();
+      devices.add(this);
+      return this;
+    } catch (Exception e) {
+      log.error("VNCClient.connect: did not work: %s", e.getMessage());
     }
     return null;
   }
 
   @Override
   public void stop() {
+    log.trace("stop(): %s", getIp());
     devices.remove(this);
     close();
   }
 
   @Override
   public void close() {
-    log.trace("close(): trying ...");
     closed = true;
-    try {
-      client.close();
-    } catch (IOException e) {
-      log.error("close(): did not work: %s", e.getMessage());
-    }
+    client.close();
     client = null;
   }
 

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ADBGadget {
+public class ADBDevice {
 
   private static int lvl = 3;
 
@@ -46,19 +46,19 @@ public class ADBGadget {
   private String sDeviceVersion = "???";
 
 
-  private static ADBGadget adbDevice = null;
+  private static ADBDevice adbDevice = null;
 
   public static int KEY_HOME = 3;
   public static int KEY_BACK = 4;
   public static int KEY_MENU = 82;
   public static int KEY_POWER = 26;
 
-  private ADBGadget() {
+  private ADBDevice() {
   }
 
-  public static ADBGadget init() {
+  public static ADBDevice init() {
     if (adbDevice == null) {
-      adbDevice = new ADBGadget();
+      adbDevice = new ADBDevice();
       adbDevice.device = ADBClient.getDevice();
       if (adbDevice.device == null) {
         adbDevice = null;

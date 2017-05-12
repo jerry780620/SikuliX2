@@ -6,7 +6,7 @@ package com.sikulix.core;
 
 //import com.sikulix.scripting.JythonHelper;
 
-import com.sikulix.devices.LocalDevice;
+import com.sikulix.devices.local.LocalDevice;
 import org.apache.commons.cli.*;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
@@ -18,7 +18,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.security.CodeSource;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -180,7 +179,7 @@ public class SX {
 
       // *** check how we are running
       APPTYPE = "from a jar";
-      String base = whereIs(sxGlobalClassReference);
+      String base = Content.whereIs(sxGlobalClassReference);
       if (isSet(base)) {
         SXBASEJAR = base;
         File jarBase = new File(base);
@@ -300,15 +299,6 @@ public class SX {
 
   private static String SXMAVEN = "https://repo1.maven.org/maven2/";
   private static String SXOSSRH = "https://oss.sonatype.org/content/groups/public/";
-
-  private static String whereIs(Class clazz) {
-    CodeSource codeSrc = clazz.getProtectionDomain().getCodeSource();
-    String base = null;
-    if (codeSrc != null && codeSrc.getLocation() != null) {
-      base = Content.slashify(codeSrc.getLocation().getPath(), false);
-    }
-    return base;
-  }
 
   private static String BASECLASS = "";
 
@@ -1356,7 +1346,7 @@ public class SX {
   }
 
   private static void extractLibraries(Class classRef, String from, File fTo) {
-    String classLocation = whereIs(classRef);
+    String classLocation = Content.whereIs(classRef);
     List<String> libraries;
     String source = classLocation;
     String sourceType = " from jar";

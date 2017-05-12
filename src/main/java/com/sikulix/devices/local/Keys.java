@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
-package com.sikulix.devices;
+package com.sikulix.devices.local;
 
 import com.sikulix.core.SX;
 import com.sikulix.core.SXJNA;

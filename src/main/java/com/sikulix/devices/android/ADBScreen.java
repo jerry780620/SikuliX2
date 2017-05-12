@@ -38,7 +38,7 @@ public class ADBScreen extends Region implements IScreen {
   public int waitAfterAction = 1;
 
 //---------------------------Inits
-  private ADBGadget device = null;
+  private ADBDevice device = null;
   private static ADBScreen screen = null;
 
   public static ADBScreen start() {
@@ -54,7 +54,7 @@ public class ADBScreen extends Region implements IScreen {
   }
 
   public static void stop() {
-      ADBGadget.reset();
+      ADBDevice.reset();
       screen = null;
   }
 
@@ -62,7 +62,7 @@ public class ADBScreen extends Region implements IScreen {
     super();
     setOtherScreen(this);
 
-    device = ADBGadget.init();
+    device = ADBDevice.init();
     if (device != null) {
       robot = device.getRobot(this);
       robot.setAutoDelay(10);
@@ -79,7 +79,7 @@ public class ADBScreen extends Region implements IScreen {
     return null != device;
   }
 
-  public ADBGadget getADBDevice() {
+  public ADBDevice getADBDevice() {
     return device;
   }
 

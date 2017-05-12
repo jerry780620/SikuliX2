@@ -18,14 +18,16 @@ public class Parameters {
   private Map<String, String> parameterTypes = new HashMap<>();
   private String[] parameterNames = null;
   private Object[] parameterDefaults = new Object[0];
+  private Object[] parameterNotSet = new Object[0];
+  private Map<String, Object> parametersActual = new HashMap<>();
 
   private Map<String, Object> parameters = new HashMap<>();
 
   public Parameters(String theNames, String theClasses) {
-    this(theNames, theClasses, new Object[0]);
+    this(theNames, theClasses, new Object[0], new Object[0]);
   }
 
-  public Parameters(String theNames, String theClasses, Object[] theDefaults) {
+  public Parameters(String theNames, String theClasses, Object[] theDefaults, Object[] theNotsets) {
     String[] names = theNames.split(",");
     String[] classes = theClasses.split(",");
     if (names.length == classes.length) {
@@ -35,6 +37,8 @@ public class Parameters {
           clazz = clazz.toLowerCase();
           if ("s".equals(clazz)) {
             clazz = "String";
+          } else if ("h".equals(clazz)) {
+            clazz = "Hidden";
           } else if ("i".equals(clazz)) {
             clazz = "Integer";
           } else if ("d".equals(clazz)) {
@@ -45,13 +49,14 @@ public class Parameters {
             clazz = "Element";
           }
         }
-        if ("String".equals(clazz) || "Integer".equals(clazz) ||
+        if ("Hidden".equals(clazz) || "String".equals(clazz) || "Integer".equals(clazz) ||
                 "Double".equals(clazz) || "Boolean".equals(clazz) || "Element".equals(clazz)) {
           parameterTypes.put(names[n], clazz);
         }
       }
       parameterNames = names;
       parameterDefaults = theDefaults;
+      parameterNotSet = theNotsets;
     } else {
       log.error("different length: names: %s classes: %s", theNames, theClasses);
     }
@@ -62,7 +67,7 @@ public class Parameters {
     String theClasses = (String) args[1];
     Object[] theDefaults = (Object[]) args[2];
     Object[] theArgs = (Object[]) args[3];
-    Parameters theParameters = new Parameters(theNames, theClasses, theDefaults);
+    Parameters theParameters = new Parameters(theNames, theClasses, theDefaults, new Object[0]);
     return theParameters.getParameters(theArgs);
   }
 
@@ -117,7 +122,7 @@ public class Parameters {
   private Object getParameter(Object possibleValue, String parameterName) {
     String clazz = parameterTypes.get(parameterName);
     Object value = null;
-    if ("String".equals(clazz)) {
+    if ("String".equals(clazz) || "Hidden".equals(clazz)) {
       if (possibleValue instanceof String) {
         value = possibleValue;
       }
@@ -156,6 +161,7 @@ public class Parameters {
     try {
       Method method = instance.getClass().getMethod(methodName, new Class[]{Object.class});
       method.invoke(instance, value);
+      parametersActual.put(parameter, value);
     } catch (Exception e) {
       log.error("setParameter(): did not work: %s (%s = %s)", e.getMessage(), parameter, value);
     }
@@ -192,5 +198,19 @@ public class Parameters {
       }
     }
     return params;
+  }
+
+  public String toString() {
+    String parameters = "";
+    for (String parameter : parameterNames) {
+      if (parametersActual.containsKey(parameter)) {
+        Object value = parametersActual.get(parameter);
+        if (parameterTypes.get(parameter).equals("Hidden")) {
+          value = "***";
+        }
+        parameters += String.format("%s = %s, ", parameter, value);
+      }
+    }
+    return parameters;
   }
 }

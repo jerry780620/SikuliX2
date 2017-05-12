@@ -4,7 +4,7 @@
 
 package com.sikulix.api;
 
-import com.sikulix.devices.LocalDevice;
+import com.sikulix.devices.local.LocalDevice;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 

@@ -7,6 +7,8 @@ package com.sikulix.util;
 import com.sikulix.core.Content;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
+import com.sikulix.devices.IDevice;
+import com.sikulix.devices.vnc.VNCDevice;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +62,14 @@ public class Sikulix {
 
     if (options.contains("tool")) {
       new Tool();
+    }
+
+    if (options.contains("play")) {
+//********** play start
+      IDevice vnc = new VNCDevice().start("127.0.0.1", 5900, "vnc");
+      SX.pause(3);
+      vnc.stop();
+//********** play end
     }
   }
 }

@@ -2,11 +2,12 @@
  * Copyright (c) 2017 - sikulix.com - MIT license
  */
 
-package com.sikulix.devices;
+package com.sikulix.devices.local;
 
 import com.sikulix.api.*;
 import com.sikulix.api.Event;
 import com.sikulix.core.*;
+import com.sikulix.devices.IDevice;
 import com.sikulix.devices.hook.NativeHook;
 import com.sikulix.util.animation.Animator;
 import com.sikulix.util.animation.AnimatorOutQuarticEase;
@@ -19,7 +20,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class LocalDevice implements IDevice {
+public class LocalDevice extends IDevice {
 
   private static SXLog log = SX.getSXLog("SX.LocalDevice");
 
