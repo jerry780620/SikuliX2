@@ -98,28 +98,37 @@ public class VNCDevice extends IDevice implements Closeable {
 
   @Override
   public IDevice start(Object... args) {
-    load(this.getClass());
-    parameters.initParameters(this, args);
-    log.trace("start(): %s", parameters);
+    boolean available = false;
     try {
-      client = VNCClient.connect(ip, port, password, true);
-      new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            client.processMessages();
-          } catch (RuntimeException e) {
-            if (!closed) {
-              throw e;
+      Class.forName("com.sikulix.vnc.VNCCLient");
+      available = true;
+    } catch (ClassNotFoundException e) {
+    }
+    if (available) {
+      parameters.initParameters(this, args);
+      log.trace("start(): %s", parameters);
+      try {
+        client = VNCClient.connect(ip, port, password, true);
+        new Thread(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              client.processMessages();
+            } catch (RuntimeException e) {
+              if (!closed) {
+                throw e;
+              }
             }
           }
-        }
-      }).start();
-      capture();
-      devices.add(this);
-      return this;
-    } catch (Exception e) {
-      log.error("VNCClient.connect: did not work: %s", e.getMessage());
+        }).start();
+        capture();
+        devices.add(this);
+        return this;
+      } catch (Exception e) {
+        log.error("VNCClient.connect: did not work: %s", e.getMessage());
+      }
+    } else {
+      log.error("VNC not working: sikulix2tigervnc not on classpath");
     }
     return null;
   }

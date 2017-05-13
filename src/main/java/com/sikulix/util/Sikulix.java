@@ -67,8 +67,10 @@ public class Sikulix {
     if (options.contains("play")) {
 //********** play start
       IDevice vnc = new VNCDevice().start("127.0.0.1", 5900, "vnc");
-      SX.pause(3);
-      vnc.stop();
+      if (SX.isSet(vnc)) {
+        SX.pause(3);
+        vnc.stop();
+      }
 //********** play end
     }
   }
