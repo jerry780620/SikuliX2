@@ -6,6 +6,11 @@ sxjython=2.7.0
 sxjruby=9.1.6.0
 sxjedit=5.3.0
 
+# SX extensions
+sxextensions = vnc, text,
+sxextension.vnc = sikulix2tigervnc, 2.0.0, snapshot, com.sikulix.vnc.VNCClient
+sxextension.text = sikulix2tesseract, 2.0.0, snapshot, net.sourceforge.tess4j.Tesseract
+
 # Image Tool
 Tool.bundlePath =
 

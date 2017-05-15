@@ -19,6 +19,7 @@ import java.security.CodeSource;
 import java.util.*;
 import java.util.List;
 import java.util.jar.JarOutputStream;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -167,6 +168,16 @@ public class Content {
     return base;
   }
 
+  public static String whereIs(String sclazz) {
+    try {
+      Class clazz = Class.forName(sclazz, false, ClassLoader.getSystemClassLoader());
+      return whereIs(clazz);
+    } catch (ClassNotFoundException e) {
+      log.p("");
+    }
+    return null;
+  }
+
   public static List<URL> listClasspath() {
     URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
     return Arrays.asList(sysLoader.getURLs());
@@ -183,14 +194,13 @@ public class Content {
     filter = filter.toUpperCase();
     int n = 0;
     for (URL uEntry : listClasspath()) {
-      sEntry = uEntry.getPath();
       if (!filter.isEmpty()) {
-        if (!sEntry.toUpperCase().contains(filter)) {
+        if (!uEntry.toString().toUpperCase().contains(filter)) {
           n++;
           continue;
         }
       }
-      log.p("%3d: %s", n, sEntry);
+      log.p("%3d: %s", n, uEntry);
       n++;
     }
     log.p("*** classpath dump end");
@@ -207,16 +217,16 @@ public class Content {
     return expectedURL;
   }
 
-  public static boolean setClasspath(String jarOrFolder) {
+  public static boolean addClasspath(String jarOrFolder) {
     URL uJarOrFolder = Content.asURL(jarOrFolder);
     if (!new File(jarOrFolder).exists()) {
-      log.debug("addToClasspath: does not exist - not added:\n%s", jarOrFolder);
+      log.error("addToClasspath: does not exist - not added:\n%s", jarOrFolder);
       return false;
     }
     if (onClasspath(uJarOrFolder)) {
       return true;
     }
-    log.debug("addToClasspath:\n%s", uJarOrFolder);
+    log.trace("addToClasspath:\n%s", uJarOrFolder);
     Method method;
     URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
     Class sysclass = URLClassLoader.class;
@@ -228,7 +238,6 @@ public class Content {
       log.error("Did not work: %s", ex.getMessage());
       return false;
     }
-    listClasspath();
     return true;
   }
 
@@ -247,6 +256,66 @@ public class Content {
       }
     }
     return false;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="012*** script / image path">
+
+  /**
+   * try to find the given relative image file name on the image path<br>
+   * starting from entry 0, the first found existence is taken<br>
+   * absolute file names are checked for existence
+   *
+   * @param names one or more name fragments to form a path
+   * @return a valid URL or null if not found/exists
+   */
+  public static URL onImagePath(String... names) {
+    String name = asPath(concatenateFolders(0, names));
+    name = asImageFilename(name);
+    URL url = null;
+    File file = new File(name);
+    if (file.isAbsolute()) {
+      if (file.exists()) {
+        url = asURL(name);
+      }
+    } else {
+      for (URL path : getImagePath().all()) {
+        url = asURL(path, name);
+        if (existsFile(url)) {
+          break;
+        }
+        url = null;
+      }
+    }
+    return url;
+  }
+  //</editor-fold>
+
+  //<editor-fold desc="015*** bundle path">
+  public static boolean setBundlePath(Object... args) {
+    getImagePath().init(args);
+    String path = getImagePath().get(0);
+    return SX.isSet(path);
+  }
+
+  public static void clearImagePath() {
+    resetImagePath();
+  }
+
+  public static String resetImagePath(Object... args) {
+    getImagePath().clear();
+    imagePath = null;
+    getImagePath().init(args);
+    return getImagePath().get(0);
+  }
+
+  public static String getBundlePath() {
+    getImagePath().init();
+    return getImagePath().get(0);
+  }
+
+  public static boolean isBundlePathFile() {
+    return getImagePath().bundlePathIsFile();
   }
   //</editor-fold>
 
@@ -2224,23 +2293,19 @@ public class Content {
     File fullpath = new File(localPath);
     if (fullpath.exists()) {
       if (fullpath.isFile()) {
-        log.error("download: target path must be a folder:\n%s", localPath);
+        log.error("downloadURL: target path must be a folder:\n%s", localPath);
         fullpath = null;
       }
     } else {
       if (!fullpath.mkdirs()) {
-        log.error("download: could not create target folder:\n%s", localPath);
+        log.error("downloadURL: could not create target folder:\n%s", localPath);
         fullpath = null;
       }
     }
     if (fullpath != null) {
       srcLength = tryGetFileSize(url);
       srcLengthKB = (int) (srcLength / 1024);
-      if (srcLength > 0) {
-        log.debug("Downloading %s having %d KB", filename, srcLengthKB);
-      } else {
-        log.debug("Downloading %s with unknown size", filename);
-      }
+      log.trace("downloadURL: %s", url);
       fullpath = new File(localPath, filename);
       targetPath = fullpath.getAbsolutePath();
       done = 0;
@@ -2279,8 +2344,9 @@ public class Content {
           }
         }
         writer.close();
-        log.debug("downloaded %d KB to:\n%s", (int) (totalBytesRead / 1024), targetPath);
-        log.debug("download time: %d", (int) (((new Date()).getTime() - begin_t) / 1000));
+        log.trace("downloadURL: %d KB %.2f secs",
+                (totalBytesRead / 1024),
+                ((new Date()).getTime() - begin_t) / 1000.0);
       } catch (Exception ex) {
         log.error("problems while downloading\n%s", ex);
         targetPath = null;
@@ -2345,7 +2411,7 @@ public class Content {
     try {
       url = new URL(src);
     } catch (MalformedURLException ex) {
-      log.error("download to string: bad URL:\n%s", src);
+      log.error("downloadURLtoString: bad URL: %s", src);
       return null;
     }
     return downloadURLtoString(url);
@@ -2354,7 +2420,7 @@ public class Content {
   public static String downloadURLtoString(URL uSrc) {
     String content = "";
     InputStream reader = null;
-    log.debug("download to string from:\n%s,", uSrc);
+    log.trace("downloadURLtoString: %s,", uSrc);
     try {
       if (getProxy() != null) {
         reader = uSrc.openConnection(getProxy()).getInputStream();
@@ -2367,7 +2433,7 @@ public class Content {
         content += (new String(Arrays.copyOfRange(buffer, 0, bytesRead), Charset.forName("utf-8")));
       }
     } catch (Exception ex) {
-      log.error("problems while downloading\n" + ex.getMessage());
+      log.error("downloadURLtoString: " + ex.getMessage());
     } finally {
       if (reader != null) {
         try {
@@ -2420,31 +2486,85 @@ public class Content {
   }
   //</editor-fold>
 
-  //<editor-fold desc="bundle path">
-  public static boolean setBundlePath(Object... args) {
-    getImagePath().init(args);
-    String path = getImagePath().get(0);
-    return SX.isSet(path);
+  //<editor-fold desc="040*** extension">
+  private static String sikulixMavenGroup = "com/sikulix";
+  private static String sikulixVersion = "2.0.0";
+  private static String pMavenRelease = "https://repo1.maven.org/maven2/";
+  private static String pMavenSnapshot = "https://oss.sonatype.org/content/groups/public/";
+
+  private static URL getMavenJarURL(String givenItem) {
+    String mPath;
+    String mJar = "";
+    String[] parts = givenItem.split(":");
+    String item = parts[0];
+    String version = sikulixVersion;
+    if (SX.isNotSet(item)) {
+      return null;
+    }
+    if (parts.length > 1 && SX.isSet(parts[1])) {
+      version = parts[1];
+    }
+    boolean isSnapshot = parts.length > 2;
+    mPath = pMavenRelease + String.format("%s/%s/%s/", sikulixMavenGroup, item, version);
+    mJar = String.format("%s-%s.jar", item, version);
+    if (isSnapshot) {
+      String mavenSnapshotPrefix = String.format("%s/%s/%s-SNAPSHOT/", sikulixMavenGroup, item, version);
+      mPath = pMavenSnapshot + mavenSnapshotPrefix;
+      String metadata = Content.downloadURLtoString(mPath + "maven-metadata.xml");
+      String timeStamp = "";
+      String buildNumber = "";
+      if (metadata != null && !metadata.isEmpty()) {
+        Matcher m = Pattern.compile("<timestamp>(.*?)</timestamp>").matcher(metadata);
+        if (m.find()) {
+          timeStamp = m.group(1);
+          m = Pattern.compile("<buildNumber>(.*?)</buildNumber>").matcher(metadata);
+          if (m.find()) {
+            buildNumber = m.group(1);
+          }
+        }
+      }
+      if (!timeStamp.isEmpty() && !buildNumber.isEmpty()) {
+        mJar = String.format("%s-%s-%s-%s.jar", item, version, timeStamp, buildNumber);
+        log.trace("getMavenJar: %s", mJar);
+      } else {
+        log.error("Maven download: could not get timestamp nor buildnumber for %s from:"
+                + "\n%s\nwith content:\n%s", givenItem, mPath, metadata);
+        return null;
+      }
+    }
+    return asURL(mPath, mJar);
   }
 
-  public static void clearImagePath() {
-    resetImagePath();
+  public static boolean addExtensionFromMaven(String extension) {
+    String sxextensions = SX.getOption("sxextensions");
+    if (sxextensions.contains(extension)) {
+      String sxextension = SX.getOption("sxextension." + extension);
+      if (SX.isSet(sxextension)) {
+        String[] parts = sxextension.split(",");
+        if (parts.length == 4) {
+          return addExtensionFromMaven(String.format("%s:%s:%s",
+                  parts[0].trim(), parts[1].trim(), parts[2].trim()), parts[3].trim());
+        }
+      }
+    }
+    return false;
   }
 
-  public static String resetImagePath(Object... args) {
-    getImagePath().clear();
-    imagePath = null;
-    getImagePath().init(args);
-    return getImagePath().get(0);
-  }
-
-  public static String getBundlePath() {
-    getImagePath().init();
-    return getImagePath().get(0);
-  }
-
-  public static boolean isBundlePathFile() {
-    return getImagePath().bundlePathIsFile();
+  private static boolean addExtensionFromMaven(String item, String clazz) {
+    if (SX.isSet(whereIs(clazz))) {
+      return true;
+    }
+    URL mavenJarURL = getMavenJarURL(item);
+    if (SX.isSet(mavenJarURL)) {
+      log.trace("addExtensionFromMaven: %s", mavenJarURL);
+      String localJar = Content.downloadURL(mavenJarURL, SX.getSXEXTENSIONSFOLDER());
+      if (SX.isSet(localJar)) {
+        if (addClasspath(localJar)) {
+          return SX.isSet(whereIs(clazz));
+        }
+      }
+    }
+    return false;
   }
   //</editor-fold>
 
@@ -2595,37 +2715,5 @@ public class Content {
       return asPath(pathList.remove(n));
     }
   }
-
-  //<editor-fold desc="012*** script / image path">
-
-  /**
-   * try to find the given relative image file name on the image path<br>
-   * starting from entry 0, the first found existence is taken<br>
-   * absolute file names are checked for existence
-   *
-   * @param names one or more name fragments to form a path
-   * @return a valid URL or null if not found/exists
-   */
-  public static URL onImagePath(String... names) {
-    String name = asPath(concatenateFolders(0, names));
-    name = asImageFilename(name);
-    URL url = null;
-    File file = new File(name);
-    if (file.isAbsolute()) {
-      if (file.exists()) {
-        url = asURL(name);
-      }
-    } else {
-      for (URL path : getImagePath().all()) {
-        url = asURL(path, name);
-        if (existsFile(url)) {
-          break;
-        }
-        url = null;
-      }
-    }
-    return url;
-  }
-  //</editor-fold>
 
 }

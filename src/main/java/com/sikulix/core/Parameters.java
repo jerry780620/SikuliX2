@@ -47,10 +47,13 @@ public class Parameters {
             clazz = "Boolean";
           } else if ("e".equals(clazz)) {
             clazz = "Element";
+          } else if ("o".equals(clazz)) {
+            clazz = "Object";
           }
         }
-        if ("Hidden".equals(clazz) || "String".equals(clazz) || "Integer".equals(clazz) ||
-                "Double".equals(clazz) || "Boolean".equals(clazz) || "Element".equals(clazz)) {
+        if ("Hidden".equals(clazz) || "String".equals(clazz) ||
+                "Integer".equals(clazz) || "Double".equals(clazz) || "Boolean".equals(clazz) ||
+                "Element".equals(clazz) || "Object".equals(clazz)) {
           parameterTypes.put(names[n], clazz);
         }
       }
@@ -84,7 +87,7 @@ public class Parameters {
           Object value = null;
           if (n + 1 < args.length) {
             if (!isParameter(args[n + 1])) {
-              value = getParameter(args[n + 1], parameterName);
+              value = getParameter(args, n + 1, parameterName);
               n++;
             }
             params.put(parameterName, value);
@@ -107,28 +110,34 @@ public class Parameters {
       } else {
         guessParameters(args[0], (Object[]) args[1]);
       }
+    } else {
+      guessParameters(args[0], new Object[0]);
     }
   }
 
   private boolean isParameter(Object parameter) {
-    if (parameter instanceof String) {
-      if (SX.isNotNull(parameterTypes.get((String) parameter))) {
-        return true;
-      }
-    }
-    return false;
+    return parameter instanceof String && SX.isNotNull(parameterTypes.get(parameter));
   }
 
-  private Object getParameter(Object possibleValue, String parameterName) {
+  private Object getParameter(Object[] possibleValues, int ix, String parameterName) {
     String clazz = parameterTypes.get(parameterName);
     Object value = null;
+    Object possibleValue = possibleValues[ix];
     if ("String".equals(clazz) || "Hidden".equals(clazz)) {
-      if (possibleValue instanceof String) {
-        value = possibleValue;
+      if (SX.isNull(possibleValue) || possibleValue instanceof String) {
+        if (SX.isNotSet(possibleValue) || possibleValue.equals(parameterNotSet[ix])) {
+          value = parameterDefaults[ix];
+        } else {
+          value = possibleValue;
+        }
       }
     } else if ("Integer".equals(clazz)) {
       if (possibleValue instanceof Integer) {
-        value = possibleValue;
+        if (parameterNotSet[ix] == possibleValue) {
+          value = parameterDefaults[ix];
+        } else {
+          value = possibleValue;
+        }
       }
     } else if ("Double".equals(clazz)) {
       if (possibleValue instanceof Double) {
@@ -138,6 +147,8 @@ public class Parameters {
       if (possibleValue instanceof Boolean) {
         value = possibleValue;
       }
+    } else if ("Object".equals(clazz)) {
+        value = possibleValue;
     } else if ("Element".equals(clazz)) {
       if (possibleValue instanceof Element) {
         value = possibleValue;
@@ -168,14 +179,15 @@ public class Parameters {
   }
 
   public void guessParameters(Object instance, Object[] args) {
-    if (args.length > 0 && SX.isNotNull(parameterNames)) {
+    if (SX.isNotNull(parameterNames)) {
       int n = 0;
       for (String parameterName : parameterNames) {
-        setParameter(instance, parameterName, getParameter(args[n], parameterName));
-        n++;
         if (n >= args.length) {
-          break;
+          setParameter(instance, parameterName, parameterDefaults[n]);
+        } else {
+          setParameter(instance, parameterName, getParameter(args, n, parameterName));
         }
+        n++;
       }
     }
   }
@@ -188,7 +200,7 @@ public class Parameters {
       for (String parameterName : parameterNames) {
         params.put(parameterName, parameterDefaults[n]);
         if (args.length > 0 && argsn < args.length) {
-          Object arg = getParameter(args[argsn], parameterName);
+          Object arg = getParameter(args,argsn, parameterName);
           if (SX.isNotNull(arg)) {
             params.put(parameterName, arg);
             argsn++;
@@ -205,7 +217,7 @@ public class Parameters {
     for (String parameter : parameterNames) {
       if (parametersActual.containsKey(parameter)) {
         Object value = parametersActual.get(parameter);
-        if (parameterTypes.get(parameter).equals("Hidden")) {
+        if (parameterTypes.get(parameter).equals("Hidden") && SX.isSet(value)) {
           value = "***";
         }
         parameters += String.format("%s = %s, ", parameter, value);

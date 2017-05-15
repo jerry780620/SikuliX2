@@ -1005,7 +1005,7 @@ public class SX {
   static String SXTESSERACTdefault = "TESSERACT";
 
   public static String setSXTESSERACT(Object... dirs) {
-    File fDir = Content.asFile(dirs, null);
+    File fDir = Content.asFolder(dirs);
     if (!Content.existsFile(fDir)) {
       terminate(1, "setSXTESSERACT: not posssible or not valid: %s", fDir);
     }
@@ -1031,7 +1031,7 @@ public class SX {
   static String[] theExtensions = new String[]{"selenium4sikulix"};
 
   public static String setSXEXTENSIONS(Object... dirs) {
-    File fDir = Content.asFile(dirs, null);
+    File fDir = Content.asFolder(dirs);
     if (!Content.existsFile(fDir)) {
       terminate(1, "setSXEXTENSIONS: not posssible or not valid: %s", fDir);
     }

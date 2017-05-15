@@ -10,6 +10,7 @@ import com.sikulix.core.SXLog;
 import com.sikulix.devices.IDevice;
 import com.sikulix.devices.vnc.VNCDevice;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +42,7 @@ public class Sikulix {
     options.addAll(Arrays.asList(args));
     if (options.isEmpty()) {
       log.p("SikuliX2::util.Sikulix::main: no args - nothing to do :-)");
+      return;
     }
     if (options.contains("trace")) {
       options.remove("trace");
@@ -66,7 +68,7 @@ public class Sikulix {
 
     if (options.contains("play")) {
 //********** play start
-      IDevice vnc = new VNCDevice().start("127.0.0.1", 5900, "vnc");
+      IDevice vnc = new VNCDevice().start();
       if (SX.isSet(vnc)) {
         SX.pause(3);
         vnc.stop();

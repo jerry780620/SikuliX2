@@ -8,11 +8,10 @@ import com.sikulix.api.Element;
 import com.sikulix.api.Picture;
 import com.sikulix.core.*;
 import com.sikulix.devices.IDevice;
-import com.sikulix.vnc.*;
+import com.sikulix.vnc.VNCClient;
 
 import java.awt.Rectangle;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class VNCDevice extends IDevice implements Closeable {
   private static String parameterNames = "ip,port,password,user,connectionTimeout,timeout";
   private static String parameterClass = "s,i,h,s,i,i";
   private static Object[] parameterDefaults = new Object[]{"127.0.0.1", 5900, null, null, 10, 1000};
-  private static Object[] parameterNotSet = new Object[]{"", 0, null, null, 0, 0};
+  private static Object[] parameterNotSet = new Object[]{null, 0, null, null, 0, 0};
 
   private static Parameters parameters = new Parameters(parameterNames, parameterClass, parameterDefaults, parameterNotSet);
 
@@ -98,13 +97,7 @@ public class VNCDevice extends IDevice implements Closeable {
 
   @Override
   public IDevice start(Object... args) {
-    boolean available = false;
-    try {
-      Class.forName("com.sikulix.vnc.VNCCLient");
-      available = true;
-    } catch (ClassNotFoundException e) {
-    }
-    if (available) {
+    if (Content.addExtensionFromMaven("vnc")) {
       parameters.initParameters(this, args);
       log.trace("start(): %s", parameters);
       try {
@@ -128,7 +121,8 @@ public class VNCDevice extends IDevice implements Closeable {
         log.error("VNCClient.connect: did not work: %s", e.getMessage());
       }
     } else {
-      log.error("VNC not working: sikulix2tigervnc not on classpath");
+      log.error("sikulix2tigervnc not on classpath");
+      Content.dumpClasspath("sikulix");
     }
     return null;
   }
