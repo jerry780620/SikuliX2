@@ -8,7 +8,7 @@ import com.sikulix.api.*;
 import com.sikulix.api.Event;
 import com.sikulix.core.*;
 import com.sikulix.devices.IDevice;
-import com.sikulix.devices.hook.NativeHook;
+import com.sikulix.devices.hook.HookDevice;
 import com.sikulix.devices.vnc.VNCDevice;
 import com.sikulix.run.Runner;
 import org.junit.*;
@@ -69,7 +69,7 @@ public class TestAll {
     return duration;
   }
 
-  private static NativeHook hook = null;
+  private static HookDevice hook = null;
   private static Symbol button = null;
 
   @BeforeClass

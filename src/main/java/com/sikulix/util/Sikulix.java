@@ -8,6 +8,7 @@ import com.sikulix.core.Content;
 import com.sikulix.core.SX;
 import com.sikulix.core.SXLog;
 import com.sikulix.devices.IDevice;
+import com.sikulix.devices.hook.HookDevice;
 import com.sikulix.devices.vnc.VNCDevice;
 
 import java.net.URL;

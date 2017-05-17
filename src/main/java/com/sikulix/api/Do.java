@@ -6,7 +6,7 @@ package com.sikulix.api;
 
 import com.sikulix.core.*;
 import com.sikulix.devices.IDevice;
-import com.sikulix.devices.hook.NativeHook;
+import com.sikulix.devices.hook.HookDevice;
 import com.sikulix.devices.hotkey.HotkeyCallback;
 import com.sikulix.util.FileChooser;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
@@ -1067,11 +1067,11 @@ public class Do {
     return SX.getSXLOCALDEVICE();
   }
 
-  public static NativeHook getHook() {
+  public static HookDevice getHook() {
     return SX.getSXLOCALDEVICE().getHook();
   }
 
-  public static boolean isMouseposition(NativeHook hook, int x, int y) {
+  public static boolean isMouseposition(HookDevice hook, int x, int y) {
     if (SX.isNotNull(hook)) {
       Point mousePos = hook.getMousePosition();
       log.trace("hook mouse position: (%d, %d) should be (%d, %d)",

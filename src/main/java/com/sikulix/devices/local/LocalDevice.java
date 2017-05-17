@@ -8,7 +8,7 @@ import com.sikulix.api.*;
 import com.sikulix.api.Event;
 import com.sikulix.core.*;
 import com.sikulix.devices.IDevice;
-import com.sikulix.devices.hook.NativeHook;
+import com.sikulix.devices.hook.HookDevice;
 import com.sikulix.util.animation.Animator;
 import com.sikulix.util.animation.AnimatorOutQuarticEase;
 import com.sikulix.util.animation.AnimatorTimeBased;
@@ -37,7 +37,7 @@ public class LocalDevice extends IDevice {
       log.terminate(1, "No monitors - might be headless %s");
     }
     if (SX.isOption("SX.withHook", false)) {
-      hook = NativeHook.start();
+      hook = (HookDevice) new HookDevice().start();
     }
     return this;
   }
@@ -51,11 +51,11 @@ public class LocalDevice extends IDevice {
     return true;
   }
 
-  public NativeHook getHook() {
+  public HookDevice getHook() {
     return hook;
   }
 
-  NativeHook hook = null;
+  HookDevice hook = null;
   
   private Object synchObject = new Object();
   private boolean locked = false;

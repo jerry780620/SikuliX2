@@ -7,9 +7,10 @@ sxjruby=9.1.6.0
 sxjedit=5.3.0
 
 # SX extensions
-sxextensions = vnc, text,
+sxextensions = vnc, text, hook
 sxextension.vnc = sikulix2tigervnc, 2.0.0, snapshot, com.sikulix.vnc.VNCClient
 sxextension.text = sikulix2tesseract, 2.0.0, snapshot, net.sourceforge.tess4j.Tesseract
+sxextension.hook = sikulix2nativehook, 2.0.0, snapshot, com.sikulix.devices.hook.NativeHook
 
 # Image Tool
 Tool.bundlePath =

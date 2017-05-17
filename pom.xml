@@ -77,6 +77,13 @@
             <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.sikulix</groupId>
+            <!--GNU General Public License v3.0-->
+            <!--https://github.com/RaiMan/Sikulix2nativehook-->
+            <artifactId>sikulix2nativehook</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>commons-cli</groupId>
             <!--Apache License 2.0-->
             <artifactId>commons-cli</artifactId>
@@ -121,13 +128,6 @@
             <!--https://github.com/stleary/JSON-java-->
             <artifactId>json</artifactId>
             <version>20160810</version>
-        </dependency>
-        <dependency>
-            <groupId>com.1stleg</groupId>
-            <!--GNU General Public License v3.0-->
-            <!--https://github.com/kwhat/jnativehook-->
-            <artifactId>jnativehook</artifactId>
-            <version>2.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.nanohttpd</groupId>
