@@ -977,10 +977,10 @@ public class TestAll {
     if (!SX.isHeadless() && !SX.isTravisCI()) {
       result = "capture something on a VNCScreen";
       IDevice vnc = new VNCDevice();
-      vnc.start("192.168.2.24", 5900);
+      vnc.start("192.168.2.63", 5900, "vnc");
       Element area = new Element(100, 100, 300, 300);
       Picture picture;
-      for (int n = 0; n < 3; n++) {
+      for (int n = 0; n < 1; n++) {
         start();
         picture = vnc.capture();
         log.p("time: %s", end());
