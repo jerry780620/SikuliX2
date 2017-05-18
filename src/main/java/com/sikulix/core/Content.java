@@ -31,7 +31,7 @@ public class Content {
   private static int lvl = SXLog.DEBUG;
 
   public static void start() {
-    log.trace("!start: class init");
+    //log.trace("!start: class init");
   }
 
   //<editor-fold desc="001*** Proxy">
