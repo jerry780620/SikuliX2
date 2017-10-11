@@ -399,7 +399,7 @@ public class Content {
       }
     } catch (Exception ex) {
       log.error("unzip: not possible: source:\n%s\ntarget:\n%s\n(%s)%s",
-              fpZip, fpTarget, entry.getName(), ex);
+          fpZip, fpTarget, entry.getName(), ex);
       return false;
     } finally {
       try {
@@ -1052,7 +1052,7 @@ public class Content {
       return temp;
     } catch (IOException ex) {
       log.error("createTempFile: IOException: %s\n%s", ex.getMessage(),
-              fpath + File.separator + temp1 + "12....56" + temp2);
+          fpath + File.separator + temp1 + "12....56" + temp2);
       return null;
     }
   }
@@ -1103,14 +1103,6 @@ public class Content {
   //</editor-fold>
 
   //<editor-fold desc="030*** evaluate File / URL">
-  public static File asFile(Object... args) {
-    URL url = asURL(args);
-    if (SX.isNull(url) || !"file".equals(url.getProtocol())) {
-      return null;
-    }
-    return new File(asPath(url));
-  }
-
   public static boolean existsFile(Object... args) {
     boolean exists = false;
     URL url = asURL(args);
@@ -1163,22 +1155,6 @@ public class Content {
     return found;
   }
 
-  public static File asFolder(Object... args) {
-    File file = asFile(args);
-    if (SX.isNull(file)) {
-      return null;
-    }
-    if (file.isDirectory()) {
-      return file;
-    }
-    file.mkdirs();
-    if (file.isDirectory()) {
-      return file;
-    }
-    log.error("asFolder: not created %s", file);
-    return null;
-  }
-
   private static final Pattern validEndings = Pattern.compile(".*?(.png|.jpg|.jpeg|.tiff|.bmp)$");
 
   public static String asImageFilename(String fname) {
@@ -1220,7 +1196,7 @@ public class Content {
   }
 
   public static String asPath(Object path) {
-    String sPath = path.toString();
+    String sPath = SX.isNull(path) ? "" : path.toString();
     if (path instanceof URL) {
       URL uPath = (URL) path;
       String proto = "";
@@ -1232,36 +1208,62 @@ public class Content {
         sPath = uPath.toExternalForm();
       }
     }
-    return sPath;
+    return slashify(sPath, false);
+  }
+
+  public static File asFile(Object... args) {
+    URL url = asURL(args);
+    if (SX.isNull(url) || !"file".equals(url.getProtocol())) {
+      return null;
+    }
+    return new File(asPath(url));
+  }
+
+  public static File asFolder(Object... args) {
+    File file = asFile(args);
+    if (SX.isNull(file)) {
+      return null;
+    }
+    if (file.isDirectory()) {
+      return file;
+    }
+    file.mkdirs();
+    if (file.isDirectory()) {
+      return file;
+    }
+    log.error("asFolder: not created %s", file);
+    return null;
   }
 
   public static URL asURL(Object... args) {
     URL url = null;
+    File subs = null;
     if (args.length > 0) {
+      if (args.length > 1) {
+        subs = concatenateFolders(1, args);
+      }
       if (args[0] instanceof String) {
         String path = (String) args[0];
         if (path.startsWith("http")) {
-          url = asNetURL(args);
+          url = asNetURL(path, subs);
         } else if (path.startsWith("jar:") || path.equals("jar")
-                || path.endsWith(".jar") || path.contains(".jar!/")) {
-          url = asJarURL(args);
+            || path.endsWith(".jar") || path.contains(".jar!/")) {
+          url = asJarURL(path, subs);
         } else {
-          url = asFileURL(args);
+          url = asFileURL(path, subs);
         }
       } else if (args[0] instanceof URL) {
         url = (URL) args[0];
-        if (args.length > 1) {
-          String proto = ((URL) args[0]).getProtocol();
-          if (proto.startsWith("http")) {
-            url = asNetURL(args);
-          } else if (proto.startsWith("jar")) {
-            url = asJarURL(args);
-          } else {
-            url = asFileURL(args);
-          }
+        String proto = ((URL) args[0]).getProtocol();
+        if (proto.startsWith("http")) {
+          url = asNetURL(url, subs);
+        } else if (proto.startsWith("jar")) {
+          url = asJarURL(url, subs);
+        } else {
+          url = asFileURL(url, subs);
         }
       } else if (args[0] instanceof File) {
-        url = asFileURL(args);
+        url = asFileURL(args[0], subs);
       } else {
         log.error("asURL: invalid arg0: %s", args[0]);
       }
@@ -1270,65 +1272,67 @@ public class Content {
   }
 
   private static File concatenateFolders(int start, Object... folders) {
-    File file = new File(asPath(folders[start]));
-    if (start == 0 && (folders[0] instanceof String && ((String) folders[0]).startsWith("./"))) {
-      return file;
-    }
-    boolean slashAdded = false;
-    if (!file.isAbsolute()) {
-      file = new File("/" + asPath(folders[start]));
-      slashAdded = true;
-    }
-    for (int n = start + 1; n < folders.length; n++) {
+    File file = null; //new File("");
+    File checkFile = null;
+//    if (start == 0 && (folders[0] instanceof String && ((String) folders[0]).startsWith("./"))) {
+//      return file;
+//    }
+//    boolean slashAdded = false;
+//    if (!file.isAbsolute()) {
+//      file = new File("/" + asPath(folders[start]));
+//      slashAdded = true;
+//    }
+    for (int n = start; n < folders.length; n++) {
       file = new File(file, folders[n].toString());
     }
     try {
-      file = file.getCanonicalFile();
+      checkFile = file.getCanonicalFile();
     } catch (IOException e) {
+      file = null;
     }
-    if (slashAdded) {
-      file = new File(file.toString().substring(1));
-    }
+//    if (slashAdded) {
+//      file = new File(file.toString().substring(1));
+//    }
     return file;
   }
 
-  private static URL asFileURL(Object... args) {
+  private static URL asFileURL(Object base, File subs) {
     URL url = null;
-    if (args.length > 0) {
-      File file = concatenateFolders(0, args);
-      if (file.toString().startsWith("./") || !file.exists()) {
-        url = asClassURL(file.toString());
-        if (SX.isNotNull(url)) {
-          return url;
-        }
+    File file = new File(base.toString().replaceFirst("file:", ""));
+    if (SX.isNotNull(subs)) {
+      file = new File(file, subs.toString());
+    }
+    String genericPath = slashify(file.toString(), false);
+    if (genericPath.startsWith("./") || !file.exists()) {
+      url = asClassURL(genericPath, subs);
+      if (SX.isNotNull(url)) {
+        return url;
       }
-      try {
-        url = new URL("file:" + file.toString());
-      } catch (MalformedURLException e) {
-        SX.error("asFileURL: %s (%s)", file, e.getMessage());
-      }
+    }
+    try {
+      url = new URL("file:" + file.toString());
+    } catch (MalformedURLException e) {
+      SX.error("asFileURL: %s (%s)", file, e.getMessage());
     }
     return url;
   }
 
-  private static URL asClassURL(Object... args) {
-    if (args.length == 0) {
-      return null;
-    }
-    String fpAlt = "";
-    String fpMain = (String) args[0];
+  private static URL asClassURL(String base, File subs) {
     URL url = null;
     Class clazz = null;
     String clazzName;
-    String fpSubPath = "";
-    int n = fpMain.indexOf("/");
+    String subPath = null;
+    int n = base.indexOf("/");
     if (n > 0) {
-      clazzName = fpMain.substring(0, n);
-      if (n < fpMain.length() - 2) {
-        fpSubPath = fpMain.substring(n + 1);
+      clazzName = base.substring(0, n);
+      if (n < base.length() - 2) {
+        subPath = base.substring(n + 1);
+        if (subPath.isEmpty()) {
+          subPath = null;
+        }
       }
     } else {
-      clazzName = fpMain;
+      clazzName = base;
     }
     if (".".equals(clazzName)) {
       if (SX.isSet(SX.getSXBASECLASS())) {
@@ -1346,88 +1350,70 @@ public class Content {
       CodeSource codeSrc = clazz.getProtectionDomain().getCodeSource();
       if (codeSrc != null && codeSrc.getLocation() != null) {
         url = codeSrc.getLocation();
+        File allSubs = new File(subPath, (SX.isNull(subs) ? "" : subs.toString()));
         if (url.getPath().endsWith(".jar")) {
-          url = asJarURL(url.getPath(), fpSubPath);
+          url = asJarURL(url.getPath(), allSubs);
         } else {
-          if (SX.isNotSet(fpAlt)) {
-            url = asFileURL(url.getPath(), fpSubPath);
-          } else {
-            url = asFileURL(fpAlt);
-          }
+          url = asFileURL(url.getPath(), allSubs);
         }
       }
     }
     return url;
   }
 
-  private static URL asJarURL(Object... args) {
-    if (args.length == 0 || SX.isNull(args[0])) {
-      return null;
-    }
-    int firstArg = 0;
-    if (args[0] instanceof String && "jar".equals(args[0])) {
-      firstArg = 1;
-    }
-    String file = asPath(args[firstArg]);
-    String folder = "";
-    if (args.length > firstArg + 1) {
-      folder = concatenateFolders(firstArg + 1, args).toString();
-      if (folder.startsWith("/")) {
-        folder = folder.substring(1);
-      }
-    }
+  private static URL asJarURL(Object base, File subs) {
+    String basePath = asPath(base);
+    String folder = asPath(subs);
+    URL jarURL = null;
     try {
       String jarSeparator = "!/";
       String separator = jarSeparator;
-      if (file.contains(".jar" + jarSeparator)) {
-        if (!file.endsWith("/") && !file.endsWith(jarSeparator)) {
+      if (basePath.contains(".jar" + jarSeparator)) {
+        if (!basePath.endsWith("/") && !basePath.endsWith(jarSeparator)) {
           separator = "/";
         }
       }
-      return new URL("jar:file:" + file + separator + folder);
+      if (folder.isEmpty()) {
+        jarURL = new URL("jar:file:" + basePath);
+      } else {
+        jarURL = new URL("jar:file:" + basePath + separator +
+            (folder.startsWith("/") ? folder.substring(1) : folder));
+      }
     } catch (MalformedURLException e) {
-      SX.error("asJarURL: %s %s (%s)", file, folder, e.getMessage());
-      return null;
+      SX.error("asJarURL: %s %s (%s)", basePath, folder, e.getMessage());
     }
+    return jarURL;
   }
 
-  private static URL asNetURL(Object... args) {
-    if (args.length == 0 || SX.isNull(args[0])) {
-      return null;
-    }
-    URL netURL = null;
-    String path = null;
-    int firstArg = 0;
-    if (args[0] instanceof String && "http".equals(args[0])) {
-      firstArg = 1;
-    }
-    if (args[firstArg] instanceof String) {
-      path = (String) args[firstArg];
-      if (!path.startsWith("http://") && !path.startsWith("https://")) {
-        path = "http://" + path;
+  private static URL asNetURL(Object base, File subs) {
+    String basePath;
+    if (base instanceof String) {
+      basePath = (String) base;
+      if (!basePath.startsWith("http://") && !basePath.startsWith("https://")) {
+        basePath = "http://" + basePath;
       }
-    } else if (args[firstArg] instanceof URL && ((URL) args[firstArg]).getProtocol().startsWith("http")) {
-      path = ((URL) args[firstArg]).toExternalForm();
+    } else if (base instanceof URL && ((URL) base).getProtocol().startsWith("http")) {
+      basePath = ((URL) base).toExternalForm();
     } else {
-      log.error("asNetURL: invalid arg0: %s", args[0]);
+      log.error("asNetURL: invalid arg0: %s", base);
       return null;
     }
     String folder = "";
-    if (args.length > firstArg + 1) {
-      folder = concatenateFolders(firstArg + 1, args).toString();
+    if (SX.isNotNull(subs)) {
+      folder = asPath(subs);
       if (folder.startsWith("/")) {
         folder = folder.substring(1);
       }
     }
+    URL netURL = null;
     try {
       if (SX.isSet(folder)) {
-        netURL = new URL((path.endsWith("/") ? path : path + "/") + folder);
+        netURL = new URL((basePath.endsWith("/") ? basePath : basePath + "/") + folder);
       } else {
-        netURL = new URL(path);
+        netURL = new URL(basePath);
       }
     } catch (MalformedURLException e) {
-      SX.error("asNetURL: %s %s (%s)", args[firstArg],
-              (args.length > firstArg + 1 ? folder : ""), e.getMessage());
+      SX.error("asNetURL: %s %s (%s)", base, folder, e.getMessage());
     }
     return netURL;
   }
@@ -1453,9 +1439,6 @@ public class Content {
           path = path.substring(0, path.length() - 1);
         }
       }
-      if (path.startsWith("./")) {
-        path = path.substring(2);
-      }
       return path;
     } else {
       return "";
@@ -1463,7 +1446,11 @@ public class Content {
   }
 
   public static String normalize(String filename) {
-    return slashify(filename, false);
+    String path = slashify(filename, false);
+    if (path.startsWith("./")) {
+      path = path.substring(2);
+    }
+    return path;
   }
 
   public static String normalizeAbsolute(String filename, boolean withTrailingSlash) {
@@ -2345,8 +2332,8 @@ public class Content {
         }
         writer.close();
         log.trace("downloadURL: %d KB %.2f secs",
-                (totalBytesRead / 1024),
-                ((new Date()).getTime() - begin_t) / 1000.0);
+            (totalBytesRead / 1024),
+            ((new Date()).getTime() - begin_t) / 1000.0);
       } catch (Exception ex) {
         log.error("problems while downloading\n%s", ex);
         targetPath = null;
@@ -2528,7 +2515,7 @@ public class Content {
         log.trace("getMavenJar: %s", mJar);
       } else {
         log.error("Maven download: could not get timestamp nor buildnumber for %s from:"
-                + "\n%s\nwith content:\n%s", givenItem, mPath, metadata);
+            + "\n%s\nwith content:\n%s", givenItem, mPath, metadata);
         return null;
       }
     }
@@ -2543,7 +2530,7 @@ public class Content {
         String[] parts = sxextension.split(",");
         if (parts.length == 4) {
           return addExtensionFromMaven(String.format("%s:%s:%s",
-                  parts[0].trim(), parts[1].trim(), parts[2].trim()), parts[3].trim());
+              parts[0].trim(), parts[1].trim(), parts[2].trim()), parts[3].trim());
         }
       }
     }

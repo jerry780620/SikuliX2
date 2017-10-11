@@ -117,13 +117,16 @@ public class TestCoreContent {
     testCases.put(SXTest.jarImagePathClass, ".jar!/SX_Images");
     testCases.put(SXTest.gitImagePath, "https://raw.githubusercontent.com/RaiMan/SikuliX2/master/src/main/resources/SX_Images");
     String expectedSub = "/sub1/sub2/sub3";
+    String sPath = "";
     for (Object given : testCases.keySet()) {
       String expected = testCases.get(given);
       URL path = Content.asURL(given);
-      assert Content.asPath(path).endsWith(expected) :
+      sPath = Content.asPath(path);
+      assert sPath.endsWith(expected) :
               currentTest.failed("asURL(%s) is %s: ", given, path);
       URL pathSub = Content.asURL(path, "/sub1///sub2/", "/sub3//");
-      assert Content.asPath(pathSub).endsWith(expected + expectedSub) :
+      sPath = Content.asPath(pathSub);
+      assert sPath.endsWith(expected + expectedSub) :
               currentTest.failed("asURL(%s, ...) is %s: ", given, pathSub);
       currentTest.addResult(String.format("\n*** testcase: %s\n%s\n%s", given, path, pathSub));
     }
